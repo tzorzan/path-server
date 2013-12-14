@@ -5,6 +5,9 @@
 # Home page
 GET     /                                       Application.index
 
+# API
+POST    /api/data                               Api.data
+
 # Ignore favicon requests
 GET     /favicon.ico                            404
 
