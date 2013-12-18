@@ -52,6 +52,7 @@ public class Api extends Controller {
 				
 			}
 			br.close();
+			Logger.info("Added new path, id: " + p.id);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
