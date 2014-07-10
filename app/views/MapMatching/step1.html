@@ -1,0 +1,31 @@
+#{extends 'leaflet.html' /}
+#{set title:'MapMatching - step1' /}
+
+<h1>Step1</h1>
+<p>
+Punti del campionamento e relativo intorno per la scelta dei candidati.
+</p>
+
+<div id="map" style="height: 420px"></div>
+
+<script>
+onload=function(){
+	var map = L.map('map',{
+    						center: [${samples.get(0).latitude}, ${samples.get(0).longitude}],
+    						zoom: 18
+						});
+	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
+	
+	#{list items:samples, as:'sample'}
+	var circle = L.circle([${sample.latitude}, ${sample.longitude}], 20, {
+    	color: 'red',
+    	fillColor: '#f03',
+    	fillOpacity: 0.2
+	}).addTo(map);
+	
+	var circleMarker = L.circleMarker([${sample.latitude}, ${sample.longitude}], { radius: 4}).addTo(map);
+
+	#{/list}
+
+	}();
+</script>
