@@ -8,8 +8,9 @@
             ]
           },
         "properties": {
-          "prop0": "value0",
-          "prop1": 0.0
+          "comment": "My dummy comment",
+          "distance": 424,
+          "noise": 7.8
         }
       }
     ]
