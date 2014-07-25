@@ -12,12 +12,13 @@ Punti del campionamento e relativo intorno per la scelta dei candidati.
 onload=function(){
 	var map = L.map('map',{
     						center: [${samples.get(0).latitude}, ${samples.get(0).longitude}],
-    						zoom: 18
+    						zoom: 18,
+    						maxZoom: 22
 						});
 	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
 	
 	#{list items:samples, as:'sample'}
-	var circle = L.circle([${sample.latitude}, ${sample.longitude}], 20, {
+	var circle = L.circle([${sample.latitude}, ${sample.longitude}], 0, {
     	color: 'red',
     	fillColor: '#f03',
     	fillOpacity: 0.2
