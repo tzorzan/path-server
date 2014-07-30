@@ -11,22 +11,32 @@ Punti del campionamento e relativo intorno per la scelta dei candidati.
 <script>
 onload=function(){
 	var map = L.map('map',{
-    						center: [${samples.get(0).latitude}, ${samples.get(0).longitude}],
-    						zoom: 18,
-    						maxZoom: 22
+    						maxZoom: 20
 						});
 	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
-	
-	#{list items:samples, as:'sample'}
-	var circle = L.circle([${sample.latitude}, ${sample.longitude}], 0, {
-    	color: 'red',
-    	fillColor: '#f03',
-    	fillOpacity: 0.2
-	}).addTo(map);
-	
-	var circleMarker = L.circleMarker([${sample.latitude}, ${sample.longitude}], { radius: 4}).addTo(map);
 
+    //Draw bounding box
+	L.rectangle([[${boundingbox.getMinX()}, ${boundingbox.getMaxY()}], [${boundingbox.getMaxX()}, ${boundingbox.getMinY()}]],
+	{
+	    color: "#ff7800",
+	    fillOpacity: 0.06
+	}).addTo(map);
+
+	#{list items:samples, as:'sample'}
+	    L.circleMarker([${sample.latitude}, ${sample.longitude}], {radius: 2, color: '#2964FF'}).addTo(map);
 	#{/list}
 
-	}();
+    var polyline;
+    #{list items:segments, as:'segment'}
+        polyline = L.polyline([
+        #{list items:segment.getCoordinates(), as:'coordinate'}
+	        [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
+	    #{/list}
+	    ], {color: '#72FF7A'});
+	    polyline.addTo(map);
+	#{/list}
+
+
+    map.fitBounds([[${boundingbox.getMinX()}, ${boundingbox.getMinY()}], [${boundingbox.getMaxX()}, ${boundingbox.getMaxY()}]]);
+}();
 </script>

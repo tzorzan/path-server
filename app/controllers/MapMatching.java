@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.*;
 import models.Path;
 import models.Sample;
 import models.Segment;
@@ -37,25 +35,30 @@ public class MapMatching extends Controller {
 
         String query = "[out:json];\n" +
                 "( way\n" +
-                " (45.4141623996377,11.8144783476189,45.4147623996377,11.8169314805713)\n" +
+                " (45.413678,11.813972,45.414751,11.817132)\n" +
                 "  [highway];\n" +
                 "  >; );\n" +
                 "out \n" +
                 "  body;";
 
         OverpassResponse r = new OverpassQuery(query).query();
-        Logger.info("Response: " + r);
 
-        samples = new ArrayList<Sample>();
-        for(OverpassResponse.Element e : r.elements) {
-            if(e.type.equals("node")) {
-                Sample tmp = new Sample();
-                tmp.latitude = e.lat;
-                tmp.longitude = e.lon;
-                samples.add(tmp);
+        List<LineString> segments = new ArrayList<LineString>();
+
+        for(OverpassResponse.Element e : r.getWays()) {
+            List<Coordinate> points  = new ArrayList<Coordinate>();
+
+            for(Long id : e.nodes) {
+                OverpassResponse.Element pe = r.getElement(id);
+                if (pe != null)
+                    points.add(new Coordinate(pe.lat, pe.lon));
             }
+
+            segments.add(fact.createLineString(points.toArray(new Coordinate[points.size()])));
         }
-        render(samples);
+
+        Envelope boundingbox = new Envelope(45.414751, 45.413678, 11.813972, 11.817132);
+        render(samples, boundingbox, segments);
 
 /*
 SELECT
@@ -84,7 +87,7 @@ ORDER BY id;
 out 
   body;
 
-  ( way
+( way
   (45.4141623996377,11.8144783476189,45.4147623996377,11.8169314805713)
   [highway];
   >; );
