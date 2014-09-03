@@ -44,9 +44,18 @@ public class MapMatching extends Controller {
             "        ) AS boxes" +
             ") AS boundingbox;";
 
-    public static void step1() {
-    	Sample sample = Sample.find("byLoaded", false).first();
-    	Path path = sample.path;
+    public static void step1(String parameter) {
+        Path path = null;
+
+        if(parameter == null) {
+            Sample sample = Sample.find("byLoaded", false).first();
+            path = sample.path;
+        } else {
+            path = Path.findById(Long.valueOf(parameter));
+        }
+
+        if(path == null)
+            notFound("Path with id: " + parameter + " not found.");
 
     	List<Sample> samples = path.samples;
 
@@ -145,7 +154,19 @@ out
         //Logger.info("Segmento: " + s2.linestring.toText());
         //s.save();
 
-    public static void step2() {
+    public static void step2(String parameter) {
+        Sample sample;
+        if(parameter == null) {
+            sample = Sample.find("byLoaded", false).first();
+        } else {
+            sample = Sample.findById(Long.valueOf(parameter));
+        }
 
+        if(sample == null)
+            notFound("Path with id: " + parameter + " not found.");
+
+        List<LineString> segments = new ArrayList<LineString>();
+
+        render(sample, segments);
     }
 }

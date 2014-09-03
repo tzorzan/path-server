@@ -1,10 +1,9 @@
 #{extends 'leaflet.html' /}
 #{set title:'MapMatching - step1' /}
 
-<h1>Step1</h1>
+<h1>Step2</h1>
 <p>
-Punti del campionamento e relativo bounding box allargata.
-Tutti i segmenti inclusi nella bounding box sono inseriti a sistema.
+Punto di campionamento e proiezione dei candidati nei segmenti adiacenti.
 </p>
 
 <div id="map" style="height: 420px"></div>
@@ -12,19 +11,16 @@ Tutti i segmenti inclusi nella bounding box sono inseriti a sistema.
 <script>
 onload=function(){
 	var map = L.map('map',{
+	                        center: [${sample.latitude}, ${sample.longitude}],
+	                        zoom: 18,
     						maxZoom: 20
 						});
 	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
 
-    //Draw bounding box
-	L.rectangle([[${boundingbox.getMinX()}, ${boundingbox.getMaxY()}], [${boundingbox.getMaxX()}, ${boundingbox.getMinY()}]],
-	{
-	    color: "#ff7800",
-	    fillOpacity: 0.06
-	}).addTo(map);
+	L.circleMarker([${sample.latitude}, ${sample.longitude}], {radius: 2, color: '#2964FF'}).addTo(map);
 
-	#{list items:samples, as:'sample'}
-	    L.circleMarker([${sample.latitude}, ${sample.longitude}], {radius: 2, color: '#2964FF'}).addTo(map);
+    #{list items:candidates, as:'candidate'}
+	    L.circleMarker([${candidate.latitude}, ${candidate.longitude}], {radius: 2, color: '#ff7800'}).addTo(map);
 	#{/list}
 
     var polyline;
@@ -36,8 +32,5 @@ onload=function(){
 	    ], {color: '#72FF7A'});
 	    polyline.addTo(map);
 	#{/list}
-
-
-    map.fitBounds([[${boundingbox.getMinX()}, ${boundingbox.getMinY()}], [${boundingbox.getMaxX()}, ${boundingbox.getMaxY()}]]);
 }();
 </script>

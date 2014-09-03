@@ -15,4 +15,5 @@ GET     /favicon.ico                            404
 GET     /public/                                staticDir:public
 
 # Catch all
+*       /{controller}/{action}/{parameter}     {controller}.{action}
 *       /{controller}/{action}                  {controller}.{action}
