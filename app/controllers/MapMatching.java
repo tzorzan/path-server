@@ -53,8 +53,6 @@ public class MapMatching extends Controller {
         Query query = JPA.em().createNativeQuery(bboxQuery).setParameter("tolerance", toleranceMeters).setParameter("pathid", path.id);
         Object[] res = (Object[]) query.getResultList().get(0);
 
-        Logger.info(res[0] + " " + res[1]);
-
         String geoquery = "[out:json];" +
                 "( way" +
                 " ("+res[0]+","+res[1]+","+res[2]+","+res[3]+")" +
@@ -81,8 +79,21 @@ public class MapMatching extends Controller {
         }
 
         Envelope boundingbox = new Envelope((Double) res[0],(Double) res[2],(Double) res[3],(Double) res[1]);
-        render(samples, boundingbox, segments);
 
+        for(LineString l : segments) {
+            Segment s = Segment.find("linestring = ?", l).first();
+            if(s == null) {
+                Logger.debug("Aggiungo segmento.");
+                s = new Segment();
+                s.linestring = fact.createLineString(l.getCoordinates());
+                s.save();
+            } else {
+                Logger.debug("Segmento già presente.");
+            }
+        }
+
+        render(samples, boundingbox, segments);
+    }
 /*
 SELECT
 	min(boundingbox.minlat) as minlat,
@@ -124,7 +135,6 @@ out
   body;
 
 */
-
         //Segment s = new Segment();
         //GeometryFactory fact = new GeometryFactory();
         //Coordinate[] coords  =
@@ -134,6 +144,8 @@ out
         //Segment s2 = Segment.findById(61l);
         //Logger.info("Segmento: " + s2.linestring.toText());
         //s.save();
+
+    public static void step2() {
 
     }
 }
