@@ -43,6 +43,11 @@ public class MapMatching extends Controller {
             "            s.path_id=:pathid" +
             "        ) AS boxes" +
             ") AS boundingbox;";
+    private static final String nearSegmentQuery = "" +
+            "SELECT id, linestring\n" +
+            "  FROM segment\n" +
+            "WHERE\n" +
+            "  ST_DWithin(ST_Point(:lon, :lat), linestring, :tolerance);";
 
     public static void step1(String parameter) {
         Path path = null;
@@ -103,56 +108,6 @@ public class MapMatching extends Controller {
 
         render(samples, boundingbox, segments);
     }
-/*
-SELECT
-	min(boundingbox.minlat) as minlat,
-	min(boundingbox.minlon) as minlon,
-	max(boundingbox.maxlat) as maxlat,
-	max(boundingbox.maxlon) as maxlon
-FROM (
-SELECT
-    boxes.id as id,
-    ST_YMin(boxes.box) as minlat,
-    ST_XMin(boxes.box) as minlon,
-    ST_YMax(boxes.box) as maxlat,
-    ST_XMax(boxes.box) as maxlon
-FROM
-    (SELECT
-        ST_Transform(ST_Expand(ST_Transform(ST_SetSRID(ST_Point(s.longitude, s.latitude),4326), 2163), 20), 4326) as box,
-        s.id AS id
-    FROM
-        sample AS s
-    WHERE
-	s.loaded=false
-    ) AS boxes
- ) AS boundingbox;
-*/
-        
-/*
-( way
-  (45.4139338116182,11.8150751555019,45.4143931983618,11.8156815378993)
-  [highway];
-  >; );
-out 
-  body;
-
-( way
-  (45.4141623996377,11.8144783476189,45.4147623996377,11.8169314805713)
-  [highway];
-  >; );
-out
-  body;
-
-*/
-        //Segment s = new Segment();
-        //GeometryFactory fact = new GeometryFactory();
-        //Coordinate[] coords  =
-        //        new Coordinate[] {new Coordinate(0, 2), new Coordinate(2, 0), new Coordinate(8, 6) };
-        //s.linestring = fact.createLineString(coords);
-
-        //Segment s2 = Segment.findById(61l);
-        //Logger.info("Segmento: " + s2.linestring.toText());
-        //s.save();
 
     public static void step2(String parameter) {
         Sample sample;
@@ -166,6 +121,9 @@ out
             notFound("Path with id: " + parameter + " not found.");
 
         List<LineString> segments = new ArrayList<LineString>();
+
+        Query query = JPA.em().createNativeQuery(nearSegmentQuery).setParameter("tolerance", toleranceMeters).setParameter("lon", sample.longitude).setParameter("lat", sample.latitude);
+        Object[] res = (Object[]) query.getResultList().get(0);
 
         render(sample, segments);
     }
