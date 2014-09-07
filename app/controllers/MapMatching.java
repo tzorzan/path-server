@@ -14,6 +14,7 @@ import org.postgis.PGgeometry;
 import play.Logger;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
+import play.mvc.Router;
 import utils.OverpassQuery;
 
 import javax.persistence.Query;
@@ -48,6 +49,12 @@ public class MapMatching extends Controller {
             "  FROM segment\n" +
             "WHERE\n" +
             "  ST_DWithin(ST_Point(:lon, :lat), linestring, :tolerance);";
+
+    public static void list() {
+        List<Path> paths = Path.findAll();
+        String link = Router.reverse("MapMatching.step1").url;
+        render(paths,link);
+    }
 
     public static void step1(String parameter) {
         Path path = null;
@@ -97,12 +104,12 @@ public class MapMatching extends Controller {
         for(LineString l : segments) {
             Segment s = Segment.find("linestring = ?", l).first();
             if(s == null) {
-                Logger.debug("Aggiungo segmento.");
+                Logger.debug("Aggiungo nuovo segmento.");
                 s = new Segment();
                 s.linestring = fact.createLineString(l.getCoordinates());
                 s.save();
             } else {
-                Logger.debug("Segmento già presente.");
+                Logger.trace("Segmento già presente.");
             }
         }
 

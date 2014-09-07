@@ -1,0 +1,14 @@
+#{extends 'main.html' /}
+#{set title:'MapMatching - list' /}
+
+<h1>List</h1>
+<p>
+Lista dei path registrati a sistema:
+
+    <ul>
+    #{list items:paths, as:'path'}
+        <li>${path.id} [ <a href="${link}/${path.id}">step 1</a> ]</li>
+    #{/list}
+    </ul>
+
+</p>
