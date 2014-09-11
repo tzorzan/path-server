@@ -1,0 +1,100 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.685868,
+                    43.234482
+                ]
+            },
+            "properties": {
+                "id": "067e6162-3b6f-4ae2-a171-2470b63dff00",
+                "timestamp": "2014:09:08T16:22:33CET",
+                "accuracy": 5.23,
+                "labels": {
+                    "light": 43.372135,
+                    "noise": 15.2226016853
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.685938,
+                    43.234381
+                ]
+            },
+            "properties": {
+                "id": "63894b14-7594-49cf-9457-823c685b7ee7",
+                "timestamp": "2014:09:08T16:22:39CET",
+                "accuracy": 2.43,
+                "labels": {
+                    "light": 41.373135,
+                    "noise": 18.226013
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.686003,
+                    43.234281
+                ]
+            },
+            "properties": {
+                "id": "6d771baf-3989-4de5-a5f6-6da4b5dd1142",
+                "timestamp": "2014:09:08T16:22:47CET",
+                "accuracy": 7.19,
+                "labels": {
+                    "light": 37.562135,
+                    "noise": 19.016853
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.686173,
+                    43.234178
+                ]
+            },
+            "properties": {
+                "id": "06b6c3e5-83ef-4288-9068-c120ef510eb0",
+                "timestamp": "2014:09:08T16:22:51CET",
+                "accuracy": 1.43,
+                "labels": {
+                    "light": 58.135923,
+                    "noise": 36.260163
+                }
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.686254,
+                    43.234077
+                ]
+            },
+            "properties": {
+                "id": "9a81613c-54a8-4069-9857-fa6170246f24",
+                "timestamp": "2014:09:08T16:23:02CET",
+                "accuracy": 4.63,
+                "labels": {
+                    "light": 45.894618,
+                    "noise": 12.601643
+                }
+            }
+        }
+    ]
+}
