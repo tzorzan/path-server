@@ -22,7 +22,7 @@ public class Api extends Controller {
 
 			Path p = new Path();
 			p.sent = new Date();
-			p.score = 0;
+			p.score = (Integer) featureCollection.getProperties().get("vote");
 			p.save();
 
             for (Feature f : featureCollection.getFeatures()) {
