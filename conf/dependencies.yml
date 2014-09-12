@@ -4,6 +4,7 @@ require:
     - play
     - provided -> postgis-jdbc 2.1.3
     - com.vividsolutions -> jts 1.8
+    - de.grundid.opendatalab -> geojson-jackson 1.2
     - provided -> hibernate-spatial 1.1.1
     - provided -> hibernate-spatial-postgis 1.1.1
 

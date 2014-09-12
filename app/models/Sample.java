@@ -15,12 +15,16 @@ public class Sample extends Model {
 	@ManyToOne
 	@JoinColumn(name = "path_id")
 	public Path path;
+
+    public String uuid;
 	
 	public Date timestamp;
 	
 	public Double latitude;
 	
 	public Double longitude;
+
+    public Double accuracy;
 	
 	public Boolean loaded = false;
 	

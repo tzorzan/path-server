@@ -10,8 +10,8 @@
                     43.234482
                 ]
             },
+            "id": "067e6162-3b6f-4ae2-a171-2470b63dff00",
             "properties": {
-                "id": "067e6162-3b6f-4ae2-a171-2470b63dff00",
                 "timestamp": "2014:09:08T16:22:33CET",
                 "accuracy": 5.23,
                 "labels": {
@@ -29,8 +29,8 @@
                     43.234381
                 ]
             },
+            "id": "63894b14-7594-49cf-9457-823c685b7ee7",
             "properties": {
-                "id": "63894b14-7594-49cf-9457-823c685b7ee7",
                 "timestamp": "2014:09:08T16:22:39CET",
                 "accuracy": 2.43,
                 "labels": {
@@ -48,8 +48,8 @@
                     43.234281
                 ]
             },
+            "id": "6d771baf-3989-4de5-a5f6-6da4b5dd1142",
             "properties": {
-                "id": "6d771baf-3989-4de5-a5f6-6da4b5dd1142",
                 "timestamp": "2014:09:08T16:22:47CET",
                 "accuracy": 7.19,
                 "labels": {
@@ -67,8 +67,8 @@
                     43.234178
                 ]
             },
+            "id": "06b6c3e5-83ef-4288-9068-c120ef510eb0",
             "properties": {
-                "id": "06b6c3e5-83ef-4288-9068-c120ef510eb0",
                 "timestamp": "2014:09:08T16:22:51CET",
                 "accuracy": 1.43,
                 "labels": {
@@ -86,8 +86,8 @@
                     43.234077
                 ]
             },
+            "id": "9a81613c-54a8-4069-9857-fa6170246f24",
             "properties": {
-                "id": "9a81613c-54a8-4069-9857-fa6170246f24",
                 "timestamp": "2014:09:08T16:23:02CET",
                 "accuracy": 4.63,
                 "labels": {
@@ -96,5 +96,8 @@
                 }
             }
         }
-    ]
+    ],
+    "properties": {
+        "vote": "5"
+    }
 }
