@@ -45,27 +45,23 @@ public class MapMatching extends Controller {
             "        ) AS boxes" +
             ") AS boundingbox;";
     private static final String nearSegmentQuery = "" +
-            "SELECT id, linestring\n" +
-            "  FROM segment\n" +
-            "WHERE\n" +
-            "  ST_DWithin(ST_Point(:lon, :lat), linestring, :tolerance);";
+            "SELECT s FROM Segment s";
 
     public static void list() {
         List<Path> paths = Path.findAll();
-        String link = Router.reverse("MapMatching.step1").url;
-        render(paths,link);
+        String link_step1 = Router.reverse("MapMatching.step1").url;
+        String link_step2 = Router.reverse("MapMatching.step2").url;
+        render(paths,link_step1, link_step2);
     }
 
     public static void step1(String parameter) {
         Path path = null;
-
         if(parameter == null) {
             Sample sample = Sample.find("byLoaded", false).first();
             path = sample.path;
         } else {
             path = Path.findById(Long.valueOf(parameter));
         }
-
         if(path == null)
             notFound("Path with id: " + parameter + " not found.");
 
@@ -117,21 +113,28 @@ public class MapMatching extends Controller {
     }
 
     public static void step2(String parameter) {
-        Sample sample;
+        Path path = null;
         if(parameter == null) {
-            sample = Sample.find("byLoaded", false).first();
+            Sample sample = Sample.find("byLoaded", false).first();
+            path = sample.path;
         } else {
-            sample = Sample.findById(Long.valueOf(parameter));
+            path = Path.findById(Long.valueOf(parameter));
         }
-
-        if(sample == null)
+        if(path == null)
             notFound("Path with id: " + parameter + " not found.");
 
-        List<LineString> segments = new ArrayList<LineString>();
+        List<List<LineString>> segments = new ArrayList<List<LineString>>();
 
-        Query query = JPA.em().createNativeQuery(nearSegmentQuery).setParameter("tolerance", toleranceMeters).setParameter("lon", sample.longitude).setParameter("lat", sample.latitude);
-        Object[] res = (Object[]) query.getResultList().get(0);
+        for(Sample samp:path.samples){
+            List<Segment> result = Segment.find(nearSegmentQuery).fetch();
 
-        render(sample, segments);
+            List<LineString> candidateSegments = new ArrayList<LineString>();
+            for (Segment r:result) {
+                candidateSegments.add(r.linestring);
+            }
+
+            segments.add(candidateSegments);
+        }
+        render(path, segments);
     }
 }

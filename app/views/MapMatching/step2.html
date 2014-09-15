@@ -1,5 +1,5 @@
 #{extends 'leaflet.html' /}
-#{set title:'MapMatching - step1' /}
+#{set title:'MapMatching - step2' /}
 
 <h1>Step2</h1>
 <p>
@@ -9,28 +9,47 @@ Punto di campionamento e proiezione dei candidati nei segmenti adiacenti.
 <div id="map" style="height: 420px"></div>
 
 <script>
+var segments = [
+  #{list items:segments, as:'candidatessegments'}
+    [
+      #{list items:candidatessegments, as:'candidate'}
+      [
+        #{list items:candidate.getCoordinates(), as:'coordinate'}
+            [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
+        #{/list}
+      ]${candidate_isLast ?'':',' }
+      #{/list}
+    ]${candidatessegments_isLast ?'':',' }
+  #{/list}
+];
+
+function showCandidates(candidates) {
+  candidates.forEach(function(candidate){
+    debugger;
+    var polyline = L.polyline(segments[0][0], {color: '#72FF7A'});
+    polyline.addTo(map);
+    map.fitBounds(polyline.getBounds());
+  });
+}
+
 onload=function(){
 	var map = L.map('map',{
-	                        center: [${sample.latitude}, ${sample.longitude}],
-	                        zoom: 18,
+	                        zoom: 16,
     						maxZoom: 20
 						});
 	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
-
-	L.circleMarker([${sample.latitude}, ${sample.longitude}], {radius: 2, color: '#2964FF'}).addTo(map);
-
-    #{list items:candidates, as:'candidate'}
-	    L.circleMarker([${candidate.latitude}, ${candidate.longitude}], {radius: 2, color: '#ff7800'}).addTo(map);
-	#{/list}
-
-    var polyline;
-    #{list items:segments, as:'segment'}
-        polyline = L.polyline([
-        #{list items:segment.getCoordinates(), as:'coordinate'}
-	        [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
-	    #{/list}
-	    ], {color: '#72FF7A'});
-	    polyline.addTo(map);
-	#{/list}
 }();
 </script>
+
+<h3>Samples</h3>
+<ul>
+    %{
+    n = 0;
+    for(sample in path.samples) {
+    }%
+        <a href="#" onclick="showCandidates(segments[${n}]);">${n}</a>
+    %{
+        n++;
+    }
+    }%
+</ul>
