@@ -9,6 +9,18 @@ Punto di campionamento e proiezione dei candidati nei segmenti adiacenti.
 <div id="map" style="height: 420px"></div>
 
 <script>
+var map = L.map('map',{
+                        zoom: 16,
+   						maxZoom: 16
+					});
+L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
+
+var samples = [
+  #{list items:path.samples, as:'sample'}
+            [${sample.latitude}, ${sample.longitude}]${sample_isLast ?'':',' }
+  #{/list}
+];
+
 var segments = [
   #{list items:segments, as:'candidatessegments'}
     [
@@ -23,22 +35,17 @@ var segments = [
   #{/list}
 ];
 
-function showCandidates(candidates) {
-  candidates.forEach(function(candidate){
-    debugger;
-    var polyline = L.polyline(segments[0][0], {color: '#72FF7A'});
-    polyline.addTo(map);
-    map.fitBounds(polyline.getBounds());
+function showCandidates(sample, candidates) {
+  map.eachLayer(function (layer) {
+    map.removeLayer(layer);
   });
+  candidates.forEach(function(candidate){
+    L.circleMarker(sample, {radius: 2, color: '#2964FF'}).addTo(map);
+    L.polyline(candidate, {color: '#72FF7A'}).addTo(map);
+  });
+  map.setZoom(16).panTo(sample);
 }
 
-onload=function(){
-	var map = L.map('map',{
-	                        zoom: 16,
-    						maxZoom: 20
-						});
-	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
-}();
 </script>
 
 <h3>Samples</h3>
@@ -47,7 +54,7 @@ onload=function(){
     n = 0;
     for(sample in path.samples) {
     }%
-        <a href="#" onclick="showCandidates(segments[${n}]);">${n}</a>
+        <a href="#" onclick="showCandidates(samples[${n}], segments[${n}]);">${n}</a>
     %{
         n++;
     }
