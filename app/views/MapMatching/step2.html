@@ -11,9 +11,10 @@ Punto di campionamento e proiezione dei candidati nei segmenti adiacenti.
 <script>
 var map = L.map('map',{
                         zoom: 16,
-   						maxZoom: 16
+   						maxZoom: 18
 					});
-L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
+
+L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png', {donthide: true}).addTo(map);
 
 var samples = [
   #{list items:path.samples, as:'sample'}
@@ -37,8 +38,12 @@ var segments = [
 
 function showCandidates(sample, candidates) {
   map.eachLayer(function (layer) {
-    map.removeLayer(layer);
+      if (layer.options.donthide == undefined) {
+        map.removeLayer(layer);
+      }
   });
+
+
   candidates.forEach(function(candidate){
     L.circleMarker(sample, {radius: 2, color: '#2964FF'}).addTo(map);
     L.polyline(candidate, {color: '#72FF7A'}).addTo(map);
