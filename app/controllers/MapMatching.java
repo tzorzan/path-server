@@ -45,7 +45,14 @@ public class MapMatching extends Controller {
             "        ) AS boxes" +
             ") AS boundingbox;";
     private static final String nearSegmentQuery = "" +
-            "SELECT s FROM Segment s";
+            "SELECT" +
+            " s FROM Segment s " +
+            "WHERE" +
+            " ST_DWithin(" +
+            "  ST_Transform(ST_SetSRID(s.linestring, 4326),2163)," +
+            "  ST_Transform(ST_SetSRID(ST_Point(45.4116955, 11.8815766), 4326),2163)," +
+            "  50" +
+            ")";
 
     public static void list() {
         List<Path> paths = Path.findAll();
