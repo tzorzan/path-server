@@ -46,12 +46,12 @@ public class MapMatching extends Controller {
             ") AS boundingbox;";
     private static final String nearSegmentQuery = "" +
             "SELECT" +
-            " s FROM Segment s " +
+            " * FROM Segment s " +
             "WHERE" +
             " ST_DWithin(" +
             "  ST_Transform(ST_SetSRID(s.linestring, 4326),2163)," +
-            "  ST_Transform(ST_SetSRID(ST_Point(45.4116955, 11.8815766), 4326),2163)," +
-            "  50" +
+            "  ST_Transform(ST_SetSRID(ST_Point(:sample_latitude, :sample_longitude), 4326),2163)," +
+            "  :tolerance" +
             ")";
 
     public static void list() {
@@ -133,7 +133,12 @@ public class MapMatching extends Controller {
         List<List<LineString>> segments = new ArrayList<List<LineString>>();
 
         for(Sample samp:path.samples){
-            List<Segment> result = Segment.find(nearSegmentQuery).fetch();
+
+            List<Segment> result = JPA.em().createNativeQuery(nearSegmentQuery, Segment.class)
+                    .setParameter("sample_latitude", samp.latitude)
+                    .setParameter("sample_longitude", samp.longitude)
+                    .setParameter("tolerance", toleranceMeters)
+                    .getResultList();
 
             List<LineString> candidateSegments = new ArrayList<LineString>();
             for (Segment r:result) {
