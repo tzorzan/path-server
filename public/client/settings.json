@@ -1,4 +1,5 @@
 {
 	"millisecondsToRecord": 4000,
-	"metersStep": 5
+	"metersStep": 5,
+	"settingsVisible": true
 }
