@@ -1,0 +1,185 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [11.887693, 45.410949],
+                    [11.887482, 45.410995],
+                    [11.887482, 45.410995],
+                    [11.88755, 45.411132],
+                    [11.887283, 45.411201],
+                    [11.887426, 45.411579],
+                    [11.887077, 45.411472],
+                    [11.88696, 45.411651],
+                    [11.886631, 45.411727],
+                    [11.886631, 45.411727],
+                    [11.886689, 45.411849],
+                    [11.886689, 45.411849],
+                    [11.886189, 45.411979],
+                    [11.886189, 45.411979],
+                    [11.8854, 45.412204],
+                    [11.8854, 45.412204],
+                    [11.885659, 45.412734],
+                    [11.885659, 45.412734],
+                    [11.885196, 45.412853],
+                    [11.885274, 45.413002],
+                    [11.883457, 45.413501],
+                    [11.883457, 45.413501],
+                    [11.883494, 45.413562],
+                    [11.883494, 45.413562],
+                    [11.883308, 45.413612],
+                    [11.883308, 45.413612],
+                    [11.883608, 45.414192],
+                    [11.883608, 45.414192],
+                    [11.883328, 45.414272],
+                    [11.883328, 45.414272],
+                    [11.883516, 45.414611],
+                    [11.883516, 45.414611],
+                    [11.883073, 45.414733],
+                    [11.883269, 45.415084],
+                    [11.883269, 45.415084],
+                    [11.883324, 45.415367],
+                    [11.883324, 45.415367],
+                    [11.882258, 45.41555],
+                    [11.882041, 45.415668],
+                    [11.882041, 45.415668],
+                    [11.881849, 45.415721],
+                    [11.881931, 45.415992],
+                    [11.881931, 45.415992],
+                    [11.881836, 45.416175],
+                    [11.881228, 45.416454],
+                    [11.880203, 45.416625]
+                ]
+            },
+            "properties": {
+                "comment": "Dalla Torre Archimede al centro di Padova",
+                "distance": 1540,
+                "maneuvers": [
+                    {
+                        "narrative": "Partire in direzione ovest su Via Trieste.",
+                        "streets": [
+                            "Via Trieste"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a destra su passaggio. Procedere in direzione nord-ovest (Vedere la mappa per ulteriori dettagli).",
+                        "streets": []
+                    },
+                    {
+                        "narrative": "Svoltare a destra su Via Nancy.",
+                        "streets": [
+                            "Via Nancy"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a sinistra su Via Dario Delù.",
+                        "streets": [
+                            "Via Dario Delù"
+                        ]
+                    },
+                    {
+                        "narrative": "Proseguire dritto per arrivare a Via Fratelli Ruffini.",
+                        "streets": [
+                            "Via Fratelli Ruffini"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a destra su Galleria Giovanni Berchet.",
+                        "streets": [
+                            "Galleria Giovanni Berchet"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a sinistra su Via Enrico degli Scrovegni. Passare per 1 rotatoria.",
+                        "streets": [
+                            "Via Enrico degli Scrovegni"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a destra su Via Gaspare Gozzi.",
+                        "streets": [
+                            "Via Gaspare Gozzi"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a sinistra su passaggio. Procedere in direzione ovest (Tratti con scale) (Vedere la mappa per ulteriori dettagli).",
+                        "streets": []
+                    },
+                    {
+                        "narrative": "Svoltare a destra su Piazza Gaetano Salvemini.",
+                        "streets": [
+                            "Piazza Gaetano Salvemini"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a sinistra per rimanere su Piazza Gaetano Salvemini.",
+                        "streets": [
+                            "Piazza Gaetano Salvemini"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a destra su Piazza Salvemini.",
+                        "streets": [
+                            "Piazza Salvemini"
+                        ]
+                    },
+                    {
+                        "narrative": "Svoltare a sinistra per rimanere su Piazza Salvemini.",
+                        "streets": [
+                            "Piazza Salvemini"
+                        ]
+                    },
+                    {
+                        "narrative": "Proseguire dritto per arrivare a passaggio. Procedere in direzione nord (Tratti con scale) (Vedere la mappa per ulteriori dettagli).",
+                        "streets": []
+                    },
+                    {
+                        "narrative": "Svoltare a sinistra su Via Niccolò Tommaseo.",
+                        "streets": [
+                            "Via Niccolò Tommaseo"
+                        ]
+                    },
+                    {
+                        "narrative": "Immettersi nella prossima rotatoria e prendere l'uscita seconda su Viale della Pace.",
+                        "streets": [
+                            "Viale della Pace"
+                        ]
+                    },
+                    {
+                        "narrative": "Immettersi nella prossima rotatoria e prendere l'uscita prima su Piazzale della Stazione.",
+                        "streets": [
+                            "Piazzale della Stazione"
+                        ]
+                    },
+                    {
+                        "narrative": "PIAZZALE DELLA STAZIONE.",
+                        "streets": []
+                    }
+                ],
+                "maneuverIndexes": [
+                    0,
+                    2,
+                    9,
+                    11,
+                    13,
+                    15,
+                    17,
+                    21,
+                    23,
+                    25,
+                    27,
+                    29,
+                    31,
+                    34,
+                    36,
+                    39,
+                    42,
+                    45
+                ]
+            }
+        }
+    ]
+}
