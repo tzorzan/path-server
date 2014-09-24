@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import models.*;
+import utils.MapQuestQuery;
 
 public class Api extends Controller {
 	public static void data() {
@@ -58,5 +59,15 @@ public class Api extends Controller {
             error(e);
 		}
 	}
+
+    public static void route() {
+        String[] from = params.get("from").split(",");
+        String[] to = params.get("to").split(",");
+
+        MapQuestQuery mqq = new MapQuestQuery(Double.valueOf(from[0]), Double.valueOf(from[1]),
+                Double.valueOf(to[0]), Double.valueOf(to[1]));
+
+        renderJSON(mqq.query());
+    }
 
 }
