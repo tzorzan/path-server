@@ -2,12 +2,15 @@ package utils;
 
 import com.google.gson.Gson;
 import models.boundaries.MapQuestResponse;
+import models.boundaries.PathRoutes;
 import play.Logger;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class MapQuestQuery {
@@ -31,7 +34,7 @@ public class MapQuestQuery {
         this.toLon = toLon;
     }
 
-    public MapQuestResponse query() {
+    public PathRoutes query() {
         queryRoute = String.format(Locale.ENGLISH, MAPQUEST_QUERY_ROUTE_FORMAT, fromLat, fromLon, toLat, toLon);
         Logger.debug("Query MapQuest Route:\n" + queryRoute);
 
@@ -45,7 +48,30 @@ public class MapQuestQuery {
 
         MapQuestResponse shapeResponse = new Gson().fromJson(doWSCall(queryShape), MapQuestResponse.class);
 
-        return routeResponse;
+        PathRoutes routes = new PathRoutes();
+
+        routes.type = "FeatureCollection";
+
+        PathRoutes.Feature feature = new PathRoutes.Feature();
+        feature.type = "Feature";
+
+        routes.features = new PathRoutes.Feature[1];
+        routes.features[0] = new PathRoutes.Feature();
+        routes.features[0].type = "Feature";
+        routes.features[0].geometry = new PathRoutes.Geometry();
+        routes.features[0].geometry.type = "LineString";
+        routes.features[0].geometry.coordinates = new ArrayList<Double[]>();
+        for(int i=0; i<shapeResponse.route.shape.shapePoints.length; i= i+2) {
+            Double[] coords = new Double[2];
+            coords[1] = shapeResponse.route.shape.shapePoints[i];
+            coords[0] = shapeResponse.route.shape.shapePoints[i+1];
+            routes.features[0].geometry.coordinates.add(coords);
+        }
+        routes.features[0].properties = new PathRoutes.Properties();
+        routes.features[0].properties.comment = "Generato con servizio MapQuest.";
+        routes.features[0].properties.distance = routeResponse.route.distance;
+
+        return routes;
     }
 
     private Reader doWSCall(String querystring) {
