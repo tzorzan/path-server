@@ -24,8 +24,16 @@ public class PathRoutes {
     public static class Properties {
         public String comment;
         public Double distance;
+        public Maneuver[] maneuvers;
 
         public Properties() {}
     }
 
+    public static class Maneuver {
+        public String narrative;
+        public String iconUrl;
+        public String[] streets;
+
+        public Maneuver() {}
+    }
 }

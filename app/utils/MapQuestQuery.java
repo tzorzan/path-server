@@ -71,6 +71,16 @@ public class MapQuestQuery {
         routes.features[0].properties.comment = "Generato con servizio MapQuest.";
         routes.features[0].properties.distance = routeResponse.route.distance;
 
+        List<PathRoutes.Maneuver> maneuvers = new ArrayList<PathRoutes.Maneuver>();
+        for(MapQuestResponse.Maneuver mapquest_maneuver : routeResponse.route.legs[0].maneuvers) {
+            PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
+            route_maneuver.iconUrl = mapquest_maneuver.iconUrl;
+            route_maneuver.narrative = mapquest_maneuver.narrative;
+            route_maneuver.streets = mapquest_maneuver.streets;
+            maneuvers.add(route_maneuver);
+        }
+        routes.features[0].properties.maneuvers = maneuvers.toArray(new PathRoutes.Maneuver[maneuvers.size()]);
+
         return routes;
     }
 
