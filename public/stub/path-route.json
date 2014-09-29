@@ -187,14 +187,22 @@
                         45.416454
                     ],
                     [
-                        11.880203,
-                        45.416625
+                        11.880545,
+                        45.416568
+                    ],
+                    [
+                        11.880545,
+                        45.416568
+                    ],
+                    [
+                        11.880666,
+                        45.416934
                     ]
                 ]
             },
             "properties": {
                 "comment": "Generato con servizio MapQuest.",
-                "distance": 0.722,
+                "distance": 0.731,
                 "maneuvers": [
                     {
                         "narrative": "Partire in direzione ovest su Via Trieste.",
@@ -310,10 +318,36 @@
                         ]
                     },
                     {
-                        "narrative": "PIAZZALE DELLA STAZIONE.",
+                        "narrative": "Svoltare a destra su passaggio. Procedere in direzione nord (Vedere la mappa per ulteriori dettagli).",
+                        "iconUrl": "http://content.mapquest.com/mqsite/turnsigns/rs_right_sm.gif",
+                        "streets": []
+                    },
+                    {
+                        "narrative": "Benvenuti a PADUA, VENETO 35137.",
                         "iconUrl": "http://content.mapquest.com/mqsite/turnsigns/icon-dirs-end_sm.gif",
                         "streets": []
                     }
+                ],
+                "maneuverIndexes": [
+                    0,
+                    2,
+                    9,
+                    11,
+                    13,
+                    15,
+                    17,
+                    21,
+                    23,
+                    25,
+                    27,
+                    29,
+                    31,
+                    34,
+                    36,
+                    39,
+                    42,
+                    46,
+                    47
                 ]
             }
         }

@@ -25,6 +25,7 @@ public class PathRoutes {
         public String comment;
         public Double distance;
         public Maneuver[] maneuvers;
+        public Integer[] maneuverIndexes;
 
         public Properties() {}
     }

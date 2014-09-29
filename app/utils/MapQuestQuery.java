@@ -81,6 +81,8 @@ public class MapQuestQuery {
         }
         routes.features[0].properties.maneuvers = maneuvers.toArray(new PathRoutes.Maneuver[maneuvers.size()]);
 
+        routes.features[0].properties.maneuverIndexes = shapeResponse.route.shape.maneuverIndexes;
+
         return routes;
     }
 
