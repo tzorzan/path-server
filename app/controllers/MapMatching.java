@@ -53,6 +53,16 @@ public class MapMatching extends Controller {
             "  ST_Transform(ST_SetSRID(ST_Point(:sample_latitude, :sample_longitude), 4326),2163)," +
             "  :tolerance" +
             ")";
+    private static final String candidatesQuery = "" +
+            "SELECT " +
+            "   ST_X(candidates.c) as lat, ST_Y(candidates.c) as lon " +
+            "FROM (" +
+            "   SELECT " +
+            "       ST_ClosestPoint(s.linestring, ST_Point(:sample_latitude, :sample_longitude)) as c " +
+            "   FROM Segment s " +
+            "   WHERE s.id in (:near_segments_id)" +
+            ") as candidates";
+
 
     public static void list() {
         List<Path> paths = Path.findAll();
@@ -130,7 +140,10 @@ public class MapMatching extends Controller {
         if(path == null)
             notFound("Path with id: " + parameter + " not found.");
 
+        GeometryFactory fact = new GeometryFactory();
+
         List<List<LineString>> segments = new ArrayList<List<LineString>>();
+        List<List<Point>> candidates = new ArrayList<List<Point>>();
 
         for(Sample samp:path.samples){
 
@@ -141,12 +154,26 @@ public class MapMatching extends Controller {
                     .getResultList();
 
             List<LineString> candidateSegments = new ArrayList<LineString>();
+            List<Point> candidatePoints = new ArrayList<Point>();
+            List<Long> candidateSegmentsIds = new ArrayList<Long>();
             for (Segment r:result) {
                 candidateSegments.add(r.linestring);
+                candidateSegmentsIds.add(r.id);
             }
 
             segments.add(candidateSegments);
+
+            Query query = JPA.em().createNativeQuery(candidatesQuery).setParameter("sample_latitude", samp.latitude)
+                    .setParameter("sample_longitude", samp.longitude).setParameter("near_segments_id", candidateSegmentsIds);
+
+            for (Object res : query.getResultList()) {
+                Object[] resArray = (Object[]) res;
+                candidatePoints.add(fact.createPoint(new Coordinate((Double) resArray[0], (Double) resArray[1])));
+            }
+
+            candidates.add(candidatePoints);
         }
-        render(path, segments);
+
+        render(path, segments, candidates);
     }
 }

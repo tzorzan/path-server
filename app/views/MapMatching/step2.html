@@ -36,7 +36,20 @@ var segments = [
   #{/list}
 ];
 
-function showCandidates(sample, candidates) {
+var candidates = [
+  #{list items:candidates, as:'candidatespoints'}
+        [
+      #{list items:candidatespoints, as:'point'}
+      [${point.getX()}, ${point.getY()}]${point_isLast ?'':','}
+      #{/list}
+    ]${candidatespoints_isLast ?'':',' }
+  #{/list}
+];
+
+function showCandidates(sample, candidateSegments, candidatePoints) {
+
+  debugger;
+
   map.eachLayer(function (layer) {
       if (layer.options.donthide == undefined) {
         map.removeLayer(layer);
@@ -44,14 +57,18 @@ function showCandidates(sample, candidates) {
   });
 
 
-  candidates.forEach(function(candidate){
+  candidateSegments.forEach(function(candidateSegment){
     L.circleMarker(sample, {radius: 2, color: '#2964FF'}).addTo(map);
-    L.polyline(candidate, {color: '#72FF7A'}).addTo(map);
+    L.polyline(candidateSegment, {color: '#72FF7A'}).addTo(map);
   });
-  map.setZoom(16).panTo(sample);
+
+  candidatePoints.forEach(function(candidatePoint){
+    L.circleMarker(candidatePoint, {radius: 2, color: '#FF5815'}).addTo(map);
+  });
+  map.setZoom(18).panTo(sample);
 }
 
-showCandidates(samples[0], segments[0]);
+showCandidates(samples[0], segments[0], candidates[0]);
 </script>
 
 <h3>Samples</h3>
@@ -60,7 +77,7 @@ showCandidates(samples[0], segments[0]);
     n = 0;
     for(sample in path.samples) {
     }%
-        <a href="#" onclick="showCandidates(samples[${n}], segments[${n}]);">${n}</a>
+        <a href="#" onclick="showCandidates(samples[${n}], segments[${n}], candidates[${n}]);">${n}</a>
     %{
         n++;
     }
