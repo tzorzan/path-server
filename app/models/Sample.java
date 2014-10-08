@@ -30,4 +30,8 @@ public class Sample extends Model {
 	
 	@OneToMany(mappedBy = "sample")
 	public List<Label> labels;
+
+    @ManyToOne
+    @JoinColumn(name = "roadSegment_id")
+    public RoadSegment roadSegment;
 }

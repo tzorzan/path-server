@@ -5,9 +5,14 @@ import org.hibernate.annotations.Type;
 import play.db.jpa.Model;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import java.util.List;
 
 @Entity
-public class Segment extends Model{
+public class RoadSegment extends Model{
     @Type(type="org.hibernatespatial.GeometryUserType")
     public LineString linestring;
+
+    @OneToMany(mappedBy = "roadSegment")
+    public List<Sample> samples;
 }

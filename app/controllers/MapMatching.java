@@ -1,16 +1,14 @@
 package controllers;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.Gson;
 import com.vividsolutions.jts.geom.*;
+import models.CandidatePoint;
 import models.Path;
+import models.RoadSegment;
 import models.Sample;
-import models.Segment;
 import models.boundaries.OverpassResponse;
-import org.postgis.PGgeometry;
 import play.Logger;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
@@ -117,10 +115,10 @@ public class MapMatching extends Controller {
         Envelope boundingbox = new Envelope((Double) res[0],(Double) res[2],(Double) res[3],(Double) res[1]);
 
         for(LineString l : segments) {
-            Segment s = Segment.find("linestring = ?", l).first();
+            RoadSegment s = RoadSegment.find("linestring = ?", l).first();
             if(s == null) {
                 Logger.debug("Aggiungo nuovo segmento.");
-                s = new Segment();
+                s = new RoadSegment();
                 s.linestring = fact.createLineString(l.getCoordinates());
                 s.save();
             } else {
@@ -149,7 +147,7 @@ public class MapMatching extends Controller {
 
         for(Sample samp:path.samples){
 
-            List<Segment> result = JPA.em().createNativeQuery(nearSegmentQuery, Segment.class)
+            List<RoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, RoadSegment.class)
                     .setParameter("sample_latitude", samp.latitude)
                     .setParameter("sample_longitude", samp.longitude)
                     .setParameter("tolerance", toleranceMeters)
@@ -158,7 +156,7 @@ public class MapMatching extends Controller {
             List<LineString> candidateSegments = new ArrayList<LineString>();
             List<Point> candidatePoints = new ArrayList<Point>();
             List<Long> candidateSegmentsIds = new ArrayList<Long>();
-            for (Segment r:result) {
+            for (RoadSegment r:result) {
                 candidateSegments.add(r.linestring);
                 candidateSegmentsIds.add(r.id);
             }
@@ -170,7 +168,10 @@ public class MapMatching extends Controller {
 
             for (Object res : query.getResultList()) {
                 Object[] resArray = (Object[]) res;
-                candidatePoints.add(fact.createPoint(new Coordinate((Double) resArray[0], (Double) resArray[1])));
+                CandidatePoint c = new CandidatePoint((Double) resArray[0], (Double) resArray[1]);
+                c.sample = samp;
+                c.save();
+                candidatePoints.add(c.getPoint());
             }
 
             candidates.add(candidatePoints);
@@ -198,7 +199,7 @@ public class MapMatching extends Controller {
         int i=0;
         for(Sample samp:path.samples){
 
-            List<Segment> result = JPA.em().createNativeQuery(nearSegmentQuery, Segment.class)
+            List<RoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, RoadSegment.class)
                     .setParameter("sample_latitude", samp.latitude)
                     .setParameter("sample_longitude", samp.longitude)
                     .setParameter("tolerance", toleranceMeters)
@@ -207,7 +208,7 @@ public class MapMatching extends Controller {
             List<LineString> candidateSegments = new ArrayList<LineString>();
             List<Point> candidatePoints = new ArrayList<Point>();
             List<Long> candidateSegmentsIds = new ArrayList<Long>();
-            for (Segment r:result) {
+            for (RoadSegment r:result) {
                 candidateSegments.add(r.linestring);
                 candidateSegmentsIds.add(r.id);
             }
