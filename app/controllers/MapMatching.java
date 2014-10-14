@@ -201,7 +201,7 @@ public class MapMatching extends Controller {
             List<LineString> candidateSegments = new ArrayList<LineString>();
             List<Point> candidatePoints = new ArrayList<Point>();
             List<CandidatePoint> sampleCandidates = CandidatePoint.find("bySample", samp).fetch();
-            Logger.debug("Sample: " + samp.id + " (" + candidates.size() + " candidates):");
+            Logger.debug("Sample: " + samp.id + " (" + sampleCandidates.size() + " candidates):");
 
             for (CandidatePoint candidate : sampleCandidates) {
                 Point samplePoint = fact.createPoint(new Coordinate(samp.latitude, samp.longitude));
