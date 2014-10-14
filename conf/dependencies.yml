@@ -7,6 +7,7 @@ require:
     - de.grundid.opendatalab -> geojson-jackson 1.2
     - provided -> hibernate-spatial 1.1.1
     - provided -> hibernate-spatial-postgis 1.1.1
+    - org.apache.commons -> commons-math3 3.3
 
 repositories:
     - provided:
