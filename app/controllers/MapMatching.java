@@ -207,7 +207,8 @@ public class MapMatching extends Controller {
                 Point samplePoint = fact.createPoint(new Coordinate(samp.latitude, samp.longitude));
                 candidateSegments.add(candidate.roadSegment.linestring);
                 candidatePoints.add(candidate.getPoint());
-                Logger.debug("Observation probability [ "+ samp.id + " - "+ candidate.id + " ]: " + new DecimalFormat("0.00000000").format(STMapMatching.observationProbability(samplePoint, candidate.getPoint())));
+                Double F = STMapMatching.observationProbability(candidate);
+                Logger.debug("Observation probability [ "+ samp.id + " - "+ candidate.id + " ]: " + new DecimalFormat("0.00000000").format(F));
             }
 
             segments.add(candidateSegments);

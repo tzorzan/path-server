@@ -1,10 +1,10 @@
 package models;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import play.db.jpa.Model;
 
 import java.util.Date;
@@ -34,4 +34,9 @@ public class Sample extends Model {
     @ManyToOne
     @JoinColumn(name = "roadSegment_id")
     public RoadSegment roadSegment;
+
+    @Transient
+    public Point getPoint() {
+        return new GeometryFactory().createPoint(new Coordinate(this.latitude, this.longitude));
+    }
 }
