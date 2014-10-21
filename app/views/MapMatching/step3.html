@@ -1,7 +1,7 @@
 #{extends 'leaflet.html' /}
 #{set title:'MapMatching - step3' /}
 
-<h1>Step2</h1>
+<h1>Step3</h1>
 <p>
 Valutazione e assegnazione punteggi ai candidati.
 </p>
@@ -23,30 +23,16 @@ var samples = [
 ];
 
 var segments = [
-  #{list items:segments, as:'candidatessegments'}
+  #{list items:segments, as:'matchingsegment'}
     [
-      #{list items:candidatessegments, as:'candidate'}
-      [
-        #{list items:candidate.getCoordinates(), as:'coordinate'}
-            [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
-        #{/list}
-      ]${candidate_isLast ?'':',' }
-      #{/list}
-    ]${candidatessegments_isLast ?'':',' }
+    #{list items:matchingsegment.getCoordinates(), as:'coordinate'}
+        [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
+    #{/list}
+    ]${matchingsegment_isLast ?'':',' }
   #{/list}
 ];
 
-var candidates = [
-  #{list items:candidates, as:'candidatespoints'}
-        [
-      #{list items:candidatespoints, as:'point'}
-      [${point.getX()}, ${point.getY()}]${point_isLast ?'':','}
-      #{/list}
-    ]${candidatespoints_isLast ?'':',' }
-  #{/list}
-];
-
-function showCandidates(sample, candidateSegments, candidatePoints) {
+function showCandidates(sample, matchingSegment) {
 
   map.eachLayer(function (layer) {
       if (layer.options.donthide == undefined) {
@@ -54,28 +40,21 @@ function showCandidates(sample, candidateSegments, candidatePoints) {
       }
   });
 
+  L.polyline(matchingSegment, {color: '#72FF7A'}).addTo(map);
 
-  candidateSegments.forEach(function(candidateSegment){
-    L.circleMarker(sample, {radius: 2, color: '#2964FF'}).addTo(map);
-    L.polyline(candidateSegment, {color: '#72FF7A'}).addTo(map);
-  });
-
-  candidatePoints.forEach(function(candidatePoint){
-    L.circleMarker(candidatePoint, {radius: 2, color: '#FF5815'}).addTo(map);
-  });
   map.setZoom(18).panTo(sample);
 }
 
-showCandidates(samples[0], segments[0], candidates[0]);
+showCandidates(samples[0], segments[0]);
 </script>
 
-<h3>Samples</h3>
+<h3>Matching Candidates</h3>
 <ul>
     %{
     n = 0;
     for(sample in path.samples) {
     }%
-        <a href="#" onclick="showCandidates(samples[${n}], segments[${n}], candidates[${n}]);">${n}</a>
+        <a href="#" onclick="showCandidates(samples[${n}], segments[${n}]);">${n}</a>
     %{
         n++;
     }

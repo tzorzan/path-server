@@ -193,29 +193,20 @@ public class MapMatching extends Controller {
         if(path == null)
             notFound("Path with id: " + parameter + " not found.");
 
-        List<List<LineString>> segments = new ArrayList<List<LineString>>();
-        List<List<Point>> candidates = new ArrayList<List<Point>>();
-        GeometryFactory fact = new GeometryFactory();
+        List<LineString> segments = new ArrayList<LineString>();
+        List<List<CandidatePoint>> matchingCandidates = new ArrayList<List<CandidatePoint>>();
 
         for(Sample samp:path.samples){
-            List<LineString> candidateSegments = new ArrayList<LineString>();
-            List<Point> candidatePoints = new ArrayList<Point>();
             List<CandidatePoint> sampleCandidates = CandidatePoint.find("bySample", samp).fetch();
-            Logger.debug("Sample: " + samp.id + " (" + sampleCandidates.size() + " candidates):");
+            matchingCandidates.add(new ArrayList<CandidatePoint>(sampleCandidates));
 
-            for (CandidatePoint candidate : sampleCandidates) {
-                Point samplePoint = fact.createPoint(new Coordinate(samp.latitude, samp.longitude));
-                candidateSegments.add(candidate.roadSegment.linestring);
-                candidatePoints.add(candidate.getPoint());
-                Double F = STMapMatching.observationProbability(candidate);
-                Logger.debug("Observation probability [ "+ samp.id + " - "+ candidate.id + " ]: " + new DecimalFormat("0.00000000").format(F));
-            }
-
-            segments.add(candidateSegments);
-            candidates.add(candidatePoints);
         }
 
-        render(path, segments, candidates);
+        for (CandidatePoint matched : STMapMatching.findMatch(matchingCandidates)) {
+            segments.add(matched.roadSegment.linestring);
+        }
+
+        render(path, segments, matchingCandidates);
    }
 
 }
