@@ -27,6 +27,12 @@ onload=function(){
 	    L.circleMarker([${sample.latitude}, ${sample.longitude}], {radius: 2, color: '#2964FF'}).addTo(map);
 	#{/list}
 
+	L.polyline([
+        #{list items:samples, as:'sample'}
+	        [${sample.latitude}, ${sample.longitude}]${sample_isLast ?'':',' }
+	    #{/list}
+	], {color: '#1CD2FF'}).addTo(map);
+
     var polyline;
     #{list items:segments, as:'segment'}
         polyline = L.polyline([
