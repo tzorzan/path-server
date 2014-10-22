@@ -53,6 +53,12 @@ public class MapMatching extends Controller {
             "  ST_Transform(ST_SetSRID(ST_Point(:sample_latitude, :sample_longitude), 4326),2163)," +
             "  :tolerance" +
             ")";
+    private static final String nearestSegmentQuery = "" +
+            "SELECT" +
+            " * FROM RoadSegment s " +
+            "ORDER BY " +
+            "ST_Distance( s.linestring, ST_Point(:sample_latitude, :sample_longitude)) " +
+            "LIMIT 1";
     private static final String candidatesQuery = "" +
             "SELECT " +
             "   ST_X(candidates.c) as lat, ST_Y(candidates.c) as lon " +
@@ -152,31 +158,41 @@ public class MapMatching extends Controller {
                     .setParameter("tolerance", toleranceMeters)
                     .getResultList();
 
-            List<LineString> candidateSegments = new ArrayList<LineString>();
-            List<Point> candidatePoints = new ArrayList<Point>();
-            List<Long> candidateSegmentsIds = new ArrayList<Long>();
-            for (RoadSegment r:result) {
-                candidateSegments.add(r.linestring);
-                candidateSegmentsIds.add(r.id);
+            if(result.size() == 0) {
+                //nessun segmento candidato seleziono il più vicino
+                result = JPA.em().createNativeQuery(nearestSegmentQuery, RoadSegment.class)
+                        .setParameter("sample_latitude", samp.latitude)
+                        .setParameter("sample_longitude", samp.longitude)
+                        .getResultList();
             }
 
-            segments.add(candidateSegments);
+                List<LineString> candidateSegments = new ArrayList<LineString>();
+                List<Point> candidatePoints = new ArrayList<Point>();
+                List<Long> candidateSegmentsIds = new ArrayList<Long>();
+                for (RoadSegment r : result) {
+                    candidateSegments.add(r.linestring);
+                    candidateSegmentsIds.add(r.id);
+                }
 
-            Query query = JPA.em().createNativeQuery(candidatesQuery).setParameter("sample_latitude", samp.latitude)
-                    .setParameter("sample_longitude", samp.longitude).setParameter("near_segments_id", candidateSegmentsIds);
+                segments.add(candidateSegments);
 
-            int i = 0;
-            for (Object res : query.getResultList()) {
-                Object[] resArray = (Object[]) res;
-                CandidatePoint c = new CandidatePoint((Double) resArray[0], (Double) resArray[1]);
-                c.sample = samp;
-                c.roadSegment = result.get(i);
-                c.save();
-                candidatePoints.add(c.getPoint());
-                i++;
-            }
+                Query query = JPA.em().createNativeQuery(candidatesQuery).setParameter("sample_latitude", samp.latitude)
+                        .setParameter("sample_longitude", samp.longitude).setParameter("near_segments_id", candidateSegmentsIds);
 
-            candidates.add(candidatePoints);
+                int i = 0;
+
+                Logger.debug("Sample: " + samp.id);
+                for (Object res : query.getResultList()) {
+                    Object[] resArray = (Object[]) res;
+                    CandidatePoint c = new CandidatePoint((Double) resArray[0], (Double) resArray[1]);
+                    c.sample = samp;
+                    c.roadSegment = result.get(i);
+                    c.save();
+                    candidatePoints.add(c.getPoint());
+                    i++;
+                }
+
+                candidates.add(candidatePoints);
         }
 
         render(path, segments, candidates);
