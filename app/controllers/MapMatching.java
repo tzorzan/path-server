@@ -69,41 +69,32 @@ public class MapMatching extends Controller {
             "   WHERE s.id in (:near_segments_id)" +
             ") as candidates";
 
-
-    public static void list() {
-        List<Path> paths = Path.findAll();
-        String link_step1 = Router.reverse("MapMatching.step1").url;
-        String link_step2 = Router.reverse("MapMatching.step2").url;
-        String link_step3 = Router.reverse("MapMatching.step3").url;
-        render(paths,link_step1, link_step2, link_step3);
-    }
-
-    public static void step1(String parameter) {
-        Path path = null;
+    private static Path getPathOrLast(String parameter) {
         if(parameter == null) {
             Sample sample = Sample.find("byLoaded", false).first();
-            path = sample.path;
+            return sample.path;
         } else {
-            path = Path.findById(Long.valueOf(parameter));
+            return Path.findById(Long.valueOf(parameter));
         }
-        if(path == null)
-            notFound("Path with id: " + parameter + " not found.");
+    }
 
-    	List<Sample> samples = path.samples;
-
+    public static Envelope getBoundingBox(Path path) {
         Query query = JPA.em().createNativeQuery(bboxQuery).setParameter("tolerance", toleranceMeters).setParameter("pathid", path.id);
         Object[] res = (Object[]) query.getResultList().get(0);
+        return new Envelope((Double) res[0],(Double) res[2],(Double) res[3],(Double) res[1]);
+    }
 
+    public static List<LineString> addBoundingBoxRoadSegments(Path path) {
+        Envelope boundingbox=getBoundingBox(path);
         String geoquery = "[out:json];" +
                 "( way" +
-                " ("+res[0]+","+res[1]+","+res[2]+","+res[3]+")" +
+                " ("+boundingbox.getMinX()+","+boundingbox.getMinY()+","+boundingbox.getMaxX()+","+boundingbox.getMaxY()+")" +
                 "  [highway];" +
                 "  >; );" +
                 "out " +
                 "  body;";
 
         OverpassResponse r = new OverpassQuery(geoquery).query();
-
         GeometryFactory fact = new GeometryFactory();
         List<LineString> segments = new ArrayList<LineString>();
 
@@ -119,8 +110,7 @@ public class MapMatching extends Controller {
             segments.add(fact.createLineString(points.toArray(new Coordinate[points.size()])));
         }
 
-        Envelope boundingbox = new Envelope((Double) res[0],(Double) res[2],(Double) res[3],(Double) res[1]);
-
+        //TODO: gestire la suddivisione dei segmenti
         for(LineString l : segments) {
             RoadSegment s = RoadSegment.find("linestring = ?", l).first();
             if(s == null) {
@@ -133,17 +123,31 @@ public class MapMatching extends Controller {
             }
         }
 
+        return segments;
+    }
+
+    public static void list() {
+        List<Path> paths = Path.findAll();
+        String link_step1 = Router.reverse("MapMatching.step1").url;
+        String link_step2 = Router.reverse("MapMatching.step2").url;
+        String link_step3 = Router.reverse("MapMatching.step3").url;
+        render(paths,link_step1, link_step2, link_step3);
+    }
+
+    public static void step1(String parameter) {
+        Path path = getPathOrLast(parameter);
+        if(path == null)
+            notFound("Path with id: " + parameter + " not found.");
+
+    	List<Sample> samples = path.samples;
+        Envelope boundingbox = getBoundingBox(path);
+        List<LineString> segments = addBoundingBoxRoadSegments(path);
+
         render(samples, boundingbox, segments);
     }
 
     public static void step2(String parameter) {
-        Path path = null;
-        if(parameter == null) {
-            Sample sample = Sample.find("byLoaded", false).first();
-            path = sample.path;
-        } else {
-            path = Path.findById(Long.valueOf(parameter));
-        }
+        Path path = getPathOrLast(parameter);
         if(path == null)
             notFound("Path with id: " + parameter + " not found.");
 
@@ -181,7 +185,6 @@ public class MapMatching extends Controller {
 
                 int i = 0;
 
-                Logger.debug("Sample: " + samp.id);
                 for (Object res : query.getResultList()) {
                     Object[] resArray = (Object[]) res;
                     CandidatePoint c = new CandidatePoint((Double) resArray[0], (Double) resArray[1]);
@@ -199,13 +202,7 @@ public class MapMatching extends Controller {
     }
 
     public static void step3(String parameter) {
-        Path path = null;
-        if(parameter == null) {
-            Sample sample = Sample.find("byLoaded", false).first();
-            path = sample.path;
-        } else {
-            path = Path.findById(Long.valueOf(parameter));
-        }
+        Path path = getPathOrLast(parameter);
         if(path == null)
             notFound("Path with id: " + parameter + " not found.");
 

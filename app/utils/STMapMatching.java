@@ -62,7 +62,7 @@ public class STMapMatching {
                 f_c_s.add(null);
                 for(int t = 0; t < candidatesGraph.get(i-1).size(); t++) {
                     CandidatePoint c_t = candidatesGraph.get(i-1).get(t);
-                    Logger.debug("alt = f[c_" + Integer.valueOf(i-1) + "_" + t + "]");
+                    Logger.trace("alt = f[c_" + Integer.valueOf(i-1) + "_" + t + "]");
                     Double alt = f.get(i-1).get(t) + spatialAnalysis(c_t, c_s);
                     if (alt > max) {
                         max = alt;

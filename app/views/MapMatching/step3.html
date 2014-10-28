@@ -40,6 +40,7 @@ function showCandidates(sample, matchingSegment) {
       }
   });
 
+  L.circleMarker(sample, {radius: 2, color: '#2964FF'}).addTo(map);
   L.polyline(matchingSegment, {color: '#72FF7A'}).addTo(map);
 
   map.setZoom(18).panTo(sample);
