@@ -1,6 +1,5 @@
 package controllers;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -240,6 +239,8 @@ public class MapMatching extends Controller {
         }
 
         for (CandidatePoint matched : STMapMatching.findMatch(matchingCandidates)) {
+            matched.sample.roadSegment = matched.roadSegment;
+            matched.sample.save();
             segments.add(matched.roadSegment.linestring);
         }
 
