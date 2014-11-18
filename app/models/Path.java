@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
 import play.db.jpa.Model;
 
@@ -14,5 +15,6 @@ public class Path extends Model {
 	public Integer score;
 	
 	@OneToMany(mappedBy = "path")
+	@OrderBy("timestamp ASC")
 	public List<Sample> samples;
 }
