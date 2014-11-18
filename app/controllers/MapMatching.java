@@ -109,7 +109,6 @@ public class MapMatching extends Controller {
             segments.add(fact.createLineString(points.toArray(new Coordinate[points.size()])));
         }
 
-        //TODO: gestire la suddivisione dei segmenti
         for(LineString l : segments) {
             RoadSegment s = RoadSegment.find("linestring = ?", l).first();
             if(s == null) {
@@ -125,8 +124,9 @@ public class MapMatching extends Controller {
         return segments;
     }
 
-    public static void addCandidatePoints(Path path) {
+    public static List<Sample> addCandidatePoints(Path path) {
         for(Sample samp:path.samples){
+
             List<RoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, RoadSegment.class)
                     .setParameter("sample_latitude", samp.latitude)
                     .setParameter("sample_longitude", samp.longitude)
@@ -159,6 +159,7 @@ public class MapMatching extends Controller {
                 i++;
             }
         }
+        return path.samples;
     }
 
     public static void list() {
@@ -189,36 +190,21 @@ public class MapMatching extends Controller {
         List<List<LineString>> segments = new ArrayList<List<LineString>>();
         List<List<Point>> candidates = new ArrayList<List<Point>>();
 
-        for(Sample samp:path.samples){
+        List<Sample> samples = addCandidatePoints(path);
 
+        for(Sample samp:samples){
             List<CandidatePoint> result = CandidatePoint.find("bySample", samp).fetch();
 
-                List<LineString> candidateSegments = new ArrayList<LineString>();
-                List<Point> candidatePoints = new ArrayList<Point>();
-                List<Long> candidateSegmentsIds = new ArrayList<Long>();
-                for (CandidatePoint r : result) {
-                    candidateSegments.add(r.roadSegment.linestring);
-                    candidateSegmentsIds.add(r.roadSegment.id);
-                }
+            List<LineString> candidateSegments = new ArrayList<LineString>();
+            List<Point> candidatePoints = new ArrayList<Point>();
 
-                segments.add(candidateSegments);
+            for (CandidatePoint r : result) {
+                candidateSegments.add(r.roadSegment.linestring);
+                candidatePoints.add(r.getPoint());
+            }
 
-                Query query = JPA.em().createNativeQuery(candidatesQuery).setParameter("sample_latitude", samp.latitude)
-                        .setParameter("sample_longitude", samp.longitude).setParameter("near_segments_id", candidateSegmentsIds);
-
-                int i = 0;
-
-                for (Object res : query.getResultList()) {
-                    Object[] resArray = (Object[]) res;
-                    CandidatePoint c = new CandidatePoint((Double) resArray[0], (Double) resArray[1]);
-                    c.sample = samp;
-                    c.roadSegment = result.get(i).roadSegment;
-                    c.save();
-                    candidatePoints.add(c.getPoint());
-                    i++;
-                }
-
-                candidates.add(candidatePoints);
+            segments.add(candidateSegments);
+            candidates.add(candidatePoints);
         }
 
         render(path, segments, candidates);
