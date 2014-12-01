@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.*;
-import models.CandidatePoint;
-import models.Path;
-import models.RoadSegment;
-import models.Sample;
+import models.*;
+import models.NodedRoadSegment;
 import models.boundaries.OverpassResponse;
 import play.Logger;
 import play.db.jpa.JPA;
@@ -45,7 +43,7 @@ public class MapMatching extends Controller {
             ") AS boundingbox;";
     private static final String nearSegmentQuery = "" +
             "SELECT" +
-            " * FROM RoadSegment s " +
+            " * FROM roadsegment_noded s " +
             "WHERE" +
             " ST_DWithin(" +
             "  ST_Transform(ST_SetSRID(s.linestring, 4326),2163)," +
@@ -54,7 +52,7 @@ public class MapMatching extends Controller {
             ")";
     private static final String nearestSegmentQuery = "" +
             "SELECT" +
-            " * FROM RoadSegment s " +
+            " * FROM roadsegment_noded s " +
             "ORDER BY " +
             "ST_Distance( s.linestring, ST_Point(:sample_latitude, :sample_longitude)) " +
             "LIMIT 1";
@@ -64,7 +62,7 @@ public class MapMatching extends Controller {
             "FROM (" +
             "   SELECT " +
             "       ST_ClosestPoint(s.linestring, ST_Point(:sample_latitude, :sample_longitude)) as c " +
-            "   FROM RoadSegment s " +
+            "   FROM roadsegment_noded s " +
             "   WHERE s.id in (:near_segments_id)" +
             ") as candidates";
 
@@ -121,13 +119,15 @@ public class MapMatching extends Controller {
             }
         }
 
+        //Aggiornare roadsegment_noded
+
         return segments;
     }
 
     public static List<Sample> addCandidatePoints(Path path) {
         for(Sample samp:path.samples){
 
-            List<RoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, RoadSegment.class)
+            List<NodedRoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, NodedRoadSegment.class)
                     .setParameter("sample_latitude", samp.latitude)
                     .setParameter("sample_longitude", samp.longitude)
                     .setParameter("tolerance", toleranceMeters)
@@ -135,14 +135,14 @@ public class MapMatching extends Controller {
 
             if(result.size() == 0) {
                 //nessun segmento candidato seleziono il più vicino
-                result = JPA.em().createNativeQuery(nearestSegmentQuery, RoadSegment.class)
+                result = JPA.em().createNativeQuery(nearestSegmentQuery, NodedRoadSegment.class)
                         .setParameter("sample_latitude", samp.latitude)
                         .setParameter("sample_longitude", samp.longitude)
                         .getResultList();
             }
 
             List<Long> candidateSegmentsIds = new ArrayList<Long>();
-            for (RoadSegment r : result) {
+            for (NodedRoadSegment r : result) {
                 candidateSegmentsIds.add(r.id);
             }
 
@@ -154,7 +154,7 @@ public class MapMatching extends Controller {
                 Object[] resArray = (Object[]) res;
                 CandidatePoint c = new CandidatePoint((Double) resArray[0], (Double) resArray[1]);
                 c.sample = samp;
-                c.roadSegment = result.get(i);
+                c.nodedRoadSegment = result.get(i);
                 c.save();
                 i++;
             }
@@ -199,7 +199,7 @@ public class MapMatching extends Controller {
             List<Point> candidatePoints = new ArrayList<Point>();
 
             for (CandidatePoint r : result) {
-                candidateSegments.add(r.roadSegment.linestring);
+                candidateSegments.add(r.nodedRoadSegment.linestring);
                 candidatePoints.add(r.getPoint());
             }
 
@@ -225,9 +225,9 @@ public class MapMatching extends Controller {
         }
 
         for (CandidatePoint matched : STMapMatching.findMatch(matchingCandidates)) {
-            matched.sample.roadSegment = matched.roadSegment;
+            matched.sample.roadSegment = matched.nodedRoadSegment.roadSegment;
             matched.sample.save();
-            segments.add(matched.roadSegment.linestring);
+            segments.add(matched.nodedRoadSegment.linestring);
         }
 
         render(path, segments, matchingCandidates);

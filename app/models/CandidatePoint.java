@@ -18,7 +18,7 @@ public class CandidatePoint extends Model {
     public Sample sample;
 
     @OneToOne(fetch= FetchType.LAZY)
-    public RoadSegment roadSegment;
+    public NodedRoadSegment nodedRoadSegment;
 
     @Transient
     public Point getPoint() {
