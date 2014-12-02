@@ -13,13 +13,17 @@ import javax.persistence.Table;
 @Entity
 @Table(name="roadsegment_noded")
 public class NodedRoadSegment extends Model{
-    @Type(type="org.hibernatespatial.GeometryUserType")
-    public LineString linestring;
-
     @ManyToOne
     @JoinColumn(name = "old_id")
     public RoadSegment roadSegment;
 
     @Column(name = "sub_id")
     public Long segment;
+
+    public Long source;
+
+    public Long target;
+
+    @Type(type="org.hibernatespatial.GeometryUserType")
+    public LineString linestring;
 }

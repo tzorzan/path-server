@@ -110,10 +110,10 @@ public class MapMatching extends Controller {
         for(LineString l : segments) {
             RoadSegment s = RoadSegment.find("linestring = ?", l).first();
             if(s == null) {
-                Logger.debug("Aggiungo nuovo segmento.");
                 s = new RoadSegment();
                 s.linestring = fact.createLineString(l.getCoordinates());
                 s.save();
+                Logger.debug("Aggiungo nuovo segmento (" + s.id + ").");
             } else {
                 Logger.trace("Segmento già presente.");
             }

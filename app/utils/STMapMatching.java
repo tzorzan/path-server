@@ -30,10 +30,9 @@ public class STMapMatching {
         Point c_t = candidateT.getPoint();
         Point c_s = candidateS.getPoint();
 
-        //TODO:
-        // set minimum path c_t c_s
+        Double c_t_c_s = PGRouting.getRoutingLength(candidateT.nodedRoadSegment.source, candidateS.nodedRoadSegment.source);
 
-        return distance(p_1, p) / distance(c_t, c_s);
+        return distance(p_1, p) / c_t_c_s;
     }
 
     public static Double spatialAnalysis(CandidatePoint candidateT, CandidatePoint candidateS) {
