@@ -11,7 +11,7 @@ Valutazione e assegnazione punteggi ai candidati.
 <script>
 var map = L.map('map',{
                         zoom: 16,
-   						maxZoom: 18
+   						maxZoom: 20
 					});
 
 L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png', {donthide: true}).addTo(map);
@@ -32,7 +32,10 @@ var segments = [
   #{/list}
 ];
 
-function showCandidates(sample, matchingSegment) {
+function showCandidates(n) {
+
+  var sample = samples[n],
+      matchingSegment = segments[n];
 
   map.eachLayer(function (layer) {
       if (layer.options.donthide == undefined) {
@@ -44,20 +47,45 @@ function showCandidates(sample, matchingSegment) {
   L.polyline(matchingSegment, {color: '#72FF7A'}).addTo(map);
 
   map.setZoom(18).panTo(sample);
+  currentCandidate = n;
 }
 
-showCandidates(samples[0], segments[0]);
+showCandidates(0);
+
+function leftArrowPressed() {
+  if(currentCandidate -1 >= 0)
+    showCandidates(currentCandidate -1);
+}
+
+function rightArrowPressed() {
+  if(currentCandidate + 1 < samples.length)
+    showCandidates(currentCandidate+1);
+}
+
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    switch (evt.keyCode) {
+        case 37:
+            leftArrowPressed();
+            break;
+        case 39:
+            rightArrowPressed();
+            break;
+    }
+};
 </script>
 
 <h3>Matching Candidates</h3>
 <ul>
+    <a href="#" onclick="leftArrowPressed();"><<</a>&nbsp;
     %{
     n = 0;
     for(sample in path.samples) {
     }%
-        <a href="#" onclick="showCandidates(samples[${n}], segments[${n}]);">${n}</a>
+        <a href="#" onclick="showCandidates(${n});">${n}</a>
     %{
         n++;
     }
     }%
+    &nbsp;<a href="#" onclick="rightArrowPressed();">>></a>
 </ul>
