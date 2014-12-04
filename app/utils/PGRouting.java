@@ -44,7 +44,7 @@ public class PGRouting {
     public static Double getRoutingLength(Long startVertex, Long endVertex) {
         Double cost = 0.0;
         if(startVertex == endVertex) {
-            Logger.debug("Routing " + startVertex + " - " + endVertex + " => " + cost + " (same)");
+            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost + " (same)");
             return cost;
         }
 
@@ -57,10 +57,10 @@ public class PGRouting {
                 cost += (Double) resArray[3];
             }
             Cache.set("pgr_dijkstra_" + startVertex +"-"+endVertex, cost, "5mn");
-            Logger.debug("Routing " + startVertex + " - " + endVertex + " => " + cost);
+            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost);
             return  cost;
         } else {
-            Logger.debug("Routing " + startVertex + " - " + endVertex + " => " + cost + " (cached)");
+            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost + " (cached)");
             return cacheCost;
         }
     }
@@ -78,7 +78,7 @@ public class PGRouting {
     public static Point getVertexPoint(Long id) {
         Point cacheVertexPoint = Cache.get("pgr_vertex_point_" + id, Point.class);
         if(cacheVertexPoint != null) {
-            Logger.debug("Point for vertex " + id + " from cache.");
+            Logger.trace("Point for vertex " + id + " from cache.");
             return cacheVertexPoint;
         }
 
