@@ -30,9 +30,12 @@ public class STMapMatching {
         Point c_t = candidateT.getPoint();
         Point c_s = candidateS.getPoint();
 
-        Double c_t_c_s = PGRouting.getRoutingLength(candidateT.nodedRoadSegment.source, candidateS.nodedRoadSegment.source);
+        Long c_t_vertex_id = PGRouting.getNearestVertex(candidateT.getPoint(), candidateT.nodedRoadSegment);
+        Long c_s_vertex_id = PGRouting.getNearestVertex(candidateS.getPoint(), candidateS.nodedRoadSegment);
 
-        return distance(p_1, p) / c_t_c_s;
+        Double c_t_vertex_c_s_vertex = PGRouting.getRoutingLength(c_t_vertex_id, c_s_vertex_id);
+
+        return distance(p_1, p) / distance(c_t, PGRouting.getVertexPoint(c_t_vertex_id)) + c_t_vertex_c_s_vertex + distance(c_s, PGRouting.getVertexPoint(c_s_vertex_id));
     }
 
     public static Double spatialAnalysis(CandidatePoint candidateT, CandidatePoint candidateS) {

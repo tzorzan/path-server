@@ -1,10 +1,16 @@
 package utils;
 
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
+import models.NodedRoadSegment;
 import play.Logger;
 import play.cache.Cache;
 import play.db.jpa.JPA;
 
 import javax.persistence.Query;
+
+import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
 
 public class PGRouting {
     private static String edgeQuery ="" +
@@ -27,11 +33,18 @@ public class PGRouting {
             "CAST (:end_vertex as integer), " +
             "false, " +
             "false);";
+    private static String vertexQuery ="" +
+            "SELECT " +
+            "   ST_AsText(the_geom) as point_wkt " +
+            "FROM " +
+            "   roadsegment_noded_vertices_pgr " +
+            "WHERE " +
+            "   id = :id";
 
     public static Double getRoutingLength(Long startVertex, Long endVertex) {
         Double cost = 0.0;
         if(startVertex == endVertex) {
-            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost + " (same)");
+            Logger.debug("Routing " + startVertex + " - " + endVertex + " => " + cost + " (same)");
             return cost;
         }
 
@@ -44,11 +57,41 @@ public class PGRouting {
                 cost += (Double) resArray[3];
             }
             Cache.set("pgr_dijkstra_" + startVertex +"-"+endVertex, cost, "5mn");
-            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost);
+            Logger.debug("Routing " + startVertex + " - " + endVertex + " => " + cost);
             return  cost;
         } else {
-            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost + " (cached)");
+            Logger.debug("Routing " + startVertex + " - " + endVertex + " => " + cost + " (cached)");
             return cacheCost;
+        }
+    }
+
+    public static Long getNearestVertex(Point point, NodedRoadSegment edge) {
+        Point source = getVertexPoint(edge.source);
+        Point target = getVertexPoint(edge.target);
+
+        if(distance(point, source) < distance(point, target))
+            return edge.source;
+        else
+            return edge.target;
+    }
+
+    public static Point getVertexPoint(Long id) {
+        Point cacheVertexPoint = Cache.get("pgr_vertex_point_" + id, Point.class);
+        if(cacheVertexPoint != null) {
+            Logger.debug("Point for vertex " + id + " from cache.");
+            return cacheVertexPoint;
+        }
+
+        Query query = JPA.em().createNativeQuery(vertexQuery).setParameter("id", id);
+        String wkt = (String) query.getSingleResult();;
+        WKTReader reader = new WKTReader();
+        try {
+            Point vertex = (Point) reader.read(wkt);
+            Cache.set("pgr_vertex_point_" + id, vertex);
+            return vertex;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
