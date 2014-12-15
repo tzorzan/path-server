@@ -46,14 +46,16 @@ var candidates = [
   #{/list}
 ];
 
-function showCandidates(sample, candidateSegments, candidatePoints) {
+function showCandidates(n) {
+  var sample = samples[n],
+      candidateSegments = segments[n],
+      candidatePoints = candidates[n];
 
   map.eachLayer(function (layer) {
       if (layer.options.donthide == undefined) {
         map.removeLayer(layer);
       }
   });
-
 
   candidateSegments.forEach(function(candidateSegment){
     L.circleMarker(sample, {radius: 2, color: '#2964FF'}).addTo(map);
@@ -64,20 +66,45 @@ function showCandidates(sample, candidateSegments, candidatePoints) {
     L.circleMarker(candidatePoint, {radius: 2, color: '#FF5815'}).addTo(map);
   });
   map.setZoom(18).panTo(sample);
+  currentCandidate = n;
 }
 
-showCandidates(samples[0], segments[0], candidates[0]);
+showCandidates(0);
+
+function leftArrowPressed() {
+  if(currentCandidate -1 >= 0)
+    showCandidates(currentCandidate -1);
+}
+
+function rightArrowPressed() {
+  if(currentCandidate + 1 < samples.length)
+    showCandidates(currentCandidate+1);
+}
+
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    switch (evt.keyCode) {
+        case 37:
+            leftArrowPressed();
+            break;
+        case 39:
+            rightArrowPressed();
+            break;
+    }
+};
 </script>
 
 <h3>Samples</h3>
 <ul>
+    <a href="#" onclick="leftArrowPressed();"><<</a>&nbsp;
     %{
     n = 0;
     for(sample in path.samples) {
     }%
-        <a href="#" onclick="showCandidates(samples[${n}], segments[${n}], candidates[${n}]);">${n}</a>
+        <a href="#" onclick="showCandidates(${n});">${n}</a>
     %{
         n++;
     }
     }%
+    &nbsp;<a href="#" onclick="rightArrowPressed();">>></a>
 </ul>
