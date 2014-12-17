@@ -4,6 +4,12 @@ require:
     - play
     - provided -> postgis-jdbc 2.1.3
     - com.vividsolutions -> jts 1.8
+    - provided -> gt-main 11.0
+    - provided -> gt-api 11.0
+    - provided -> gt-referencing 11.0
+    - provided -> gt-opengis 11.0
+    - provided -> gt-metadata 11.0
+    - org.jscience -> jscience 4.3.1
     - de.grundid.opendatalab -> geojson-jackson 1.2
     - provided -> hibernate-spatial 1.1.1
     - provided -> hibernate-spatial-postgis 1.1.1
