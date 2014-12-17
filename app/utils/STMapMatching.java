@@ -1,16 +1,20 @@
 package utils;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import models.CandidatePoint;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.operation.TransformException;
 import play.Logger;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
 
 public class STMapMatching {
 
@@ -19,11 +23,14 @@ public class STMapMatching {
 
     public static Double observationProbability(CandidatePoint candidate) {
         NormalDistribution normalDistribution = new NormalDistribution(mean, standard_deviation);
-        return normalDistribution.cumulativeProbability(distance(candidate.getPoint(), candidate.sample.getPoint()));
+        Double value = 1 - normalDistribution.cumulativeProbability(distance(candidate.getPoint(), candidate.sample.getPoint()));
+        Logger.trace("Observation probabilty for " + candidate.sample + " - " + candidate + " : " + value);
+        return value;
     }
 
     public static Double transmissionProbability(CandidatePoint candidateT, CandidatePoint candidateS) {
         GeometryFactory fact = new GeometryFactory();
+        DecimalFormat df = new DecimalFormat("#.########");
 
         Point p_1 = candidateT.sample.getPoint();
         Point p = candidateS.sample.getPoint();
@@ -35,11 +42,18 @@ public class STMapMatching {
 
         Double c_t_vertex_c_s_vertex = PGRouting.getRoutingLength(c_t_vertex_id, c_s_vertex_id);
 
-        return distance(p_1, p) / distance(c_t, PGRouting.getVertexPoint(c_t_vertex_id)) + c_t_vertex_c_s_vertex + distance(c_s, PGRouting.getVertexPoint(c_s_vertex_id));
+        Double eucl_distance = distance(p_1, p);
+        Double shortest_path = distance(c_t, PGRouting.getVertexPoint(c_t_vertex_id)) + c_t_vertex_c_s_vertex + distance(c_s, PGRouting.getVertexPoint(c_s_vertex_id));
+
+        Double value = eucl_distance / shortest_path;
+        Logger.trace("Transmission probabilty " + candidateT + " - " + candidateS + " = " + df.format(eucl_distance) + " / " + df.format(shortest_path) + " = " + df.format(value));
+        return value;
     }
 
     public static Double spatialAnalysis(CandidatePoint candidateT, CandidatePoint candidateS) {
-        return observationProbability(candidateS) * transmissionProbability(candidateT, candidateS);
+        Double value = observationProbability(candidateS) * transmissionProbability(candidateT, candidateS);
+        Logger.trace("Spatial Analysis " + candidateT + " - " + candidateS + " : " + value);
+        return value;
     }
 
     public static List<CandidatePoint> findMatch(List<List<CandidatePoint>> candidatesGraph) {
@@ -52,6 +66,7 @@ public class STMapMatching {
             f_1.add(observationProbability(c_s));
         }
         f.add(f_1);
+        Logger.debug("");
 
         // Valorizzo tutto f[] e pre[]
         for(int i=1; i < candidatesGraph.size(); i++) {
@@ -64,17 +79,21 @@ public class STMapMatching {
                 f_c_s.add(null);
                 for(int t = 0; t < candidatesGraph.get(i-1).size(); t++) {
                     CandidatePoint c_t = candidatesGraph.get(i-1).get(t);
-                    Logger.trace("alt = f[c_" + Integer.valueOf(i-1) + "_" + t + "]");
-                    Double alt = f.get(i-1).get(t) + spatialAnalysis(c_t, c_s);
+                    Double F_t_s = spatialAnalysis(c_t, c_s);
+                    Double alt = f.get(i-1).get(t) + F_t_s;
+                    Logger.debug("alt = f[c_" + (i-1) + "_" + t + "] + F(c_" + (i-1) + "_" + t + " -> c_" + i + "_" +
+                            s + " ) = " +  f.get(i-1).get(t) + " + " + F_t_s + " = " + alt );
                     if (alt > max) {
                         max = alt;
                         pre_c_s.set(s, c_t);
+                        Logger.trace("New max (" + max + "), now pre[c_" + i + "_" + s + "]=" + c_t);
                     }
                     f_c_s.set(s, max);
                 }
             }
             f.add(f_c_s);
             pre.add(pre_c_s);
+            Logger.debug("");
         }
 
         // Costruisco la lista con il match
@@ -93,6 +112,17 @@ public class STMapMatching {
         rList.add(c);
 
         Collections.reverse(rList);
+
+        Logger.debug("Matched sequence: [" + StringUtils.join(rList, ", ") + "]");
     return rList;
+    }
+
+    public static Double distance (Point p1, Point p2) {
+        try {
+            return JTS.orthodromicDistance(p1.getCoordinate(), p2.getCoordinate(), DefaultGeographicCRS.WGS84);
+        } catch (TransformException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

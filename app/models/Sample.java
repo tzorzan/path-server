@@ -5,6 +5,7 @@ import javax.persistence.*;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import play.db.jpa.Model;
 
 import java.util.Date;
@@ -37,6 +38,7 @@ public class Sample extends Model {
 
     @Transient
     public Point getPoint() {
-        return new GeometryFactory().createPoint(new Coordinate(this.latitude, this.longitude));
+        GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+        return gf.createPoint(new Coordinate(this.latitude, this.longitude));
     }
 }

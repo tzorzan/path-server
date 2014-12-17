@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.*;
 import models.*;
 import models.NodedRoadSegment;
 import models.boundaries.OverpassResponse;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
@@ -220,8 +221,8 @@ public class MapMatching extends Controller {
 
         for(Sample samp:path.samples){
             List<CandidatePoint> sampleCandidates = CandidatePoint.find("bySample", samp).fetch();
+            Logger.debug("Candidates for " + samp + ": [" + StringUtils.join(sampleCandidates, ", ") + "]");
             matchingCandidates.add(new ArrayList<CandidatePoint>(sampleCandidates));
-
         }
 
         for (CandidatePoint matched : STMapMatching.findMatch(matchingCandidates)) {
