@@ -9,6 +9,16 @@ Punto di campionamento e proiezione dei candidati nei segmenti adiacenti.
 <div id="map" style="height: 420px"></div>
 
 <script>
+L.InfoCircleMarker = L.CircleMarker.extend({
+   options: {
+      info: 'Custom info'
+   }
+});
+
+L.infoCircleMarker = function (id, options) {
+    return new L.InfoCircleMarker(id, options);
+};
+
 var map = L.map('map',{
                         zoom: 16,
    						maxZoom: 18
@@ -46,6 +56,23 @@ var candidates = [
   #{/list}
 ];
 
+var infoCandidates = [
+  #{list items:infoCandidates, as:'candidateinfos'}
+        [
+      #{list items:candidateinfos, as:'info'}
+      ["${info}"]${info_isLast ?'':','}
+      #{/list}
+    ]${candidateinfos_isLast ?'':',' }
+  #{/list}
+];
+
+function popupInfo(e) {
+    var popup = L.popup()
+    .setLatLng(e.latlng)
+    .setContent('<p>'+ e.target.options.info +'</p>')
+    .openOn(map);
+}
+
 function showCandidates(n) {
   var sample = samples[n],
       candidateSegments = segments[n],
@@ -58,12 +85,12 @@ function showCandidates(n) {
   });
 
   candidateSegments.forEach(function(candidateSegment){
-    L.circleMarker(sample, {radius: 2, color: '#2964FF'}).addTo(map);
-    L.polyline(candidateSegment, {color: '#72FF7A'}).addTo(map);
+    L.infoCircleMarker(sample, {radius: 2, color: '#2964FF', info: 'Sample '+n}).on('click', popupInfo).addTo(map);
+    L.polyline(candidateSegment, {color: '#72FF7A', clickable: false}).addTo(map);
   });
 
-  candidatePoints.forEach(function(candidatePoint){
-    L.circleMarker(candidatePoint, {radius: 2, color: '#FF5815'}).addTo(map);
+  candidatePoints.forEach(function(candidatePoint, index){
+    L.infoCircleMarker(candidatePoint, {radius: 3, color: '#FF5815', info: infoCandidates[n][index]}).on('click', popupInfo).addTo(map);
   });
   map.setZoom(18).panTo(sample);
   currentCandidate = n;

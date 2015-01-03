@@ -120,7 +120,7 @@ public class MapMatching extends Controller {
             }
         }
 
-        //Aggiornare roadsegment_noded
+        //TODO: Aggiornare roadsegment_noded
 
         return segments;
     }
@@ -159,6 +159,8 @@ public class MapMatching extends Controller {
                 c.save();
                 i++;
             }
+          samp.loaded = true;
+          samp.save();
         }
         return path.samples;
     }
@@ -190,25 +192,32 @@ public class MapMatching extends Controller {
 
         List<List<LineString>> segments = new ArrayList<List<LineString>>();
         List<List<Point>> candidates = new ArrayList<List<Point>>();
+        List<List<String>> infoCandidates = new ArrayList<List<String>>();
 
-        List<Sample> samples = addCandidatePoints(path);
+        List<Sample> samples = path.samples;
+
+        if (samples.get(0).loaded == null || samples.get(0).loaded == false)
+          addCandidatePoints(path);
 
         for(Sample samp:samples){
             List<CandidatePoint> result = CandidatePoint.find("bySample", samp).fetch();
 
             List<LineString> candidateSegments = new ArrayList<LineString>();
             List<Point> candidatePoints = new ArrayList<Point>();
+            List<String> candidateInfos = new ArrayList<String>();
 
             for (CandidatePoint r : result) {
                 candidateSegments.add(r.nodedRoadSegment.linestring);
                 candidatePoints.add(r.getPoint());
+                candidateInfos.add(r+"");
             }
 
             segments.add(candidateSegments);
             candidates.add(candidatePoints);
+            infoCandidates.add(candidateInfos);
         }
 
-        render(path, segments, candidates);
+        render(path, segments, candidates, infoCandidates);
     }
 
     public static void step3(String parameter) {
@@ -221,7 +230,7 @@ public class MapMatching extends Controller {
 
         for(Sample samp:path.samples){
             List<CandidatePoint> sampleCandidates = CandidatePoint.find("bySample", samp).fetch();
-            Logger.debug("Candidates for " + samp + ": [" + StringUtils.join(sampleCandidates, ", ") + "]");
+            Logger.trace("Candidates for " + samp + ": [" + StringUtils.join(sampleCandidates, ", ") + "]");
             matchingCandidates.add(new ArrayList<CandidatePoint>(sampleCandidates));
         }
 
