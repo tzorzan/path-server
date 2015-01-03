@@ -1,14 +1,9 @@
 package utils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import models.CandidatePoint;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.referencing.operation.TransformException;
 import play.Logger;
 
 import java.text.DecimalFormat;
@@ -23,30 +18,22 @@ public class STMapMatching {
 
     public static Double observationProbability(CandidatePoint candidate) {
         NormalDistribution normalDistribution = new NormalDistribution(mean, standard_deviation);
-        Double value = 1 - normalDistribution.cumulativeProbability(distance(candidate.getPoint(), candidate.sample.getPoint()));
+        Double value = 1 - normalDistribution.cumulativeProbability(PGRouting.distance(candidate.getPoint(), candidate.sample.getPoint()));
         Logger.trace("Observation probabilty for " + candidate.sample + " - " + candidate + " : " + value);
         return value;
     }
 
     public static Double transmissionProbability(CandidatePoint candidateT, CandidatePoint candidateS) {
-        GeometryFactory fact = new GeometryFactory();
         DecimalFormat df = new DecimalFormat("#.########");
 
         Point p_1 = candidateT.sample.getPoint();
         Point p = candidateS.sample.getPoint();
-        Point c_t = candidateT.getPoint();
-        Point c_s = candidateS.getPoint();
+        Double eucl_distance = PGRouting.distance(p_1, p);
 
-        Long c_t_vertex_id = PGRouting.getNearestVertex(candidateT.getPoint(), candidateT.nodedRoadSegment);
-        Long c_s_vertex_id = PGRouting.getNearestVertex(candidateS.getPoint(), candidateS.nodedRoadSegment);
-
-        Double c_t_vertex_c_s_vertex = PGRouting.getRoutingLength(c_t_vertex_id, c_s_vertex_id);
-
-        Double eucl_distance = distance(p_1, p);
-        Double shortest_path = distance(c_t, PGRouting.getVertexPoint(c_t_vertex_id)) + c_t_vertex_c_s_vertex + distance(c_s, PGRouting.getVertexPoint(c_s_vertex_id));
+        Double shortest_path = PGRouting.getCandidatesRoutingLength(candidateT, candidateS);
 
         Double value = eucl_distance / shortest_path;
-        Logger.trace("Transmission probabilty " + candidateT + " - " + candidateS + " = " + df.format(eucl_distance) + " / " + df.format(shortest_path) + " = " + df.format(value));
+        Logger.debug("Transmission probabilty " + candidateT + " - " + candidateS + " = " + df.format(eucl_distance) + " / " + df.format(shortest_path) + " = " + df.format(value));
         return value;
     }
 
@@ -81,7 +68,7 @@ public class STMapMatching {
                     CandidatePoint c_t = candidatesGraph.get(i-1).get(t);
                     Double F_t_s = spatialAnalysis(c_t, c_s);
                     Double alt = f.get(i-1).get(t) + F_t_s;
-                    Logger.debug("alt = f[c_" + (i-1) + "_" + t + "] + F(c_" + (i-1) + "_" + t + " -> c_" + i + "_" +
+                    Logger.trace("alt = f[c_" + (i-1) + "_" + t + "] + F(c_" + (i-1) + "_" + t + " -> c_" + i + "_" +
                             s + " ) = " +  f.get(i-1).get(t) + " + " + F_t_s + " = " + alt );
                     if (alt > max) {
                         max = alt;
@@ -115,14 +102,5 @@ public class STMapMatching {
 
         Logger.debug("Matched sequence: [" + StringUtils.join(rList, ", ") + "]");
     return rList;
-    }
-
-    public static Double distance (Point p1, Point p2) {
-        try {
-            return JTS.orthodromicDistance(p1.getCoordinate(), p2.getCoordinate(), DefaultGeographicCRS.WGS84);
-        } catch (TransformException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }
