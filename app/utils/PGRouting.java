@@ -14,12 +14,9 @@ import play.db.jpa.JPA;
 
 import javax.persistence.Query;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
 
 public class PGRouting {
     private static String edgeQuery ="" +
