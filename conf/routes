@@ -6,7 +6,11 @@
 GET     /                                       Application.index
 
 # API
+# Post new data to the server (samples)
 POST    /api/data                               Api.data
+
+# Request a route to the server
+GET     /api/route                              Api.route
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

@@ -1,5 +1,7 @@
 package controllers;
 
+import implementations.MapQuestRouting;
+import interfaces.Routing;
 import org.geojson.Feature;
 import org.geojson.Point;
 import play.*;
@@ -64,10 +66,9 @@ public class Api extends Controller {
         String[] from = params.get("from").split(",");
         String[] to = params.get("to").split(",");
 
-        MapQuestQuery mqq = new MapQuestQuery(Double.valueOf(from[0]), Double.valueOf(from[1]),
-                Double.valueOf(to[0]), Double.valueOf(to[1]));
+        Routing router = new MapQuestRouting();
 
-        renderJSON(mqq.query());
+        renderJSON(router.getRoute(from, to));
     }
 
 }
