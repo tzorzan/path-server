@@ -99,7 +99,7 @@ public class PGRouting {
     public static Double getRoutingLength(Long startVertex, Long endVertex) {
         Double cost = 0.0;
         if(startVertex == endVertex) {
-            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost + " (same)");
+            Logger.trace("Router " + startVertex + " - " + endVertex + " => " + cost + " (same)");
             return cost;
         }
 
@@ -112,10 +112,10 @@ public class PGRouting {
                 cost += (Double) resArray[3];
             }
             Cache.set("pgr_dijkstra_" + startVertex +"-"+endVertex, cost, "5mn");
-            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost);
+            Logger.trace("Router " + startVertex + " - " + endVertex + " => " + cost);
             return  cost;
         } else {
-            Logger.trace("Routing " + startVertex + " - " + endVertex + " => " + cost + " (cached)");
+            Logger.trace("Router " + startVertex + " - " + endVertex + " => " + cost + " (cached)");
             return cacheCost;
         }
     }

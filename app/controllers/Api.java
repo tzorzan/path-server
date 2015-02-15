@@ -1,11 +1,10 @@
 package controllers;
 
-import implementations.MapQuestRouting;
-import interfaces.Routing;
+import implementations.MapQuestRouter;
+import interfaces.Router;
+import models.boundaries.PathRoutes;
 import org.geojson.Feature;
 import org.geojson.Point;
-import play.*;
-import play.mvc.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.geojson.FeatureCollection;
@@ -14,7 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import models.*;
-import utils.MapQuestQuery;
+import play.Logger;
+import play.mvc.Controller;
 
 public class Api extends Controller {
 	public static void data() {
@@ -66,9 +66,12 @@ public class Api extends Controller {
         String[] from = params.get("from").split(",");
         String[] to = params.get("to").split(",");
 
-        Routing router = new MapQuestRouting();
+        PathRoutes routes = new PathRoutes();
 
-        renderJSON(router.getRoute(from, to));
+        List<PathRoutes.Feature> mapQuestRoutes = new MapQuestRouter().getRoute(from, to);
+        routes.features = mapQuestRoutes.toArray(new PathRoutes.Feature[mapQuestRoutes.size()]);
+
+        renderJSON(routes);
     }
 
 }
