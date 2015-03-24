@@ -17,7 +17,7 @@ public class Sample extends Model {
 	@JoinColumn(name = "path_id")
 	public Path path;
 
-    public String uuid;
+  public String uuid;
 	
 	public Date timestamp;
 	
@@ -25,20 +25,18 @@ public class Sample extends Model {
 	
 	public Double longitude;
 
-    public Double accuracy;
-	
-	public Boolean loaded = false;
+  public Double accuracy;
 	
 	@OneToMany(mappedBy = "sample")
 	public List<Label> labels;
 
-    @ManyToOne
-    @JoinColumn(name = "roadSegment_id")
-    public RoadSegment roadSegment;
+  @ManyToOne
+  @JoinColumn(name = "roadSegment_id")
+  public RoadSegment roadSegment;
 
-    @Transient
-    public Point getPoint() {
-        GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-        return gf.createPoint(new Coordinate(this.latitude, this.longitude));
-    }
+  @Transient
+  public Point getPoint() {
+    GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+      return gf.createPoint(new Coordinate(this.latitude, this.longitude));
+  }
 }

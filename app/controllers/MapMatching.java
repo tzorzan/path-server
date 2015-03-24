@@ -159,7 +159,6 @@ public class MapMatching extends Controller {
                 c.save();
                 i++;
             }
-          samp.loaded = true;
           samp.save();
         }
         return path.samples;
@@ -196,7 +195,7 @@ public class MapMatching extends Controller {
 
         List<Sample> samples = path.samples;
 
-        if (samples.get(0).loaded == null || samples.get(0).loaded == false)
+        if (samples.get(0).roadSegment == null)
           addCandidatePoints(path);
 
         for(Sample samp:samples){
