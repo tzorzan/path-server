@@ -27,6 +27,14 @@ public class PGRouting {
             "   ST_Length(ST_Transform(ST_SetSRID(linestring, 4326),2163)) as cost " +
             "FROM " +
             "   roadsegment_noded";
+    private static String labelCostQuery ="" +
+            "SELECT " +
+            "   id," +
+            "   source::integer, " +
+            "   target::integer, " +
+            "   COST_WITH_LABEL " +
+            "FROM " +
+            "   roadsegment_noded";
     private static String routingQuery ="" +
             "SELECT " +
             "   seq, " +
