@@ -70,6 +70,7 @@ public class Api extends Controller {
 
         List<PathRoutes.Feature> mapQuestRoutes = new MapQuestRouter().getRoute(from, to);
         routes.features = mapQuestRoutes.toArray(new PathRoutes.Feature[mapQuestRoutes.size()]);
+        routes.type = "FeatureCollection";
 
         renderJSON(routes);
     }
