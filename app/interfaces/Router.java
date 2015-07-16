@@ -8,5 +8,5 @@ import java.util.List;
  * Router interface
  */
 public interface Router {
-  public List<PathRoutes.Feature> getRoute(String[] from, String[] to);
+  public PathRoutes.Feature getRoute(String[] from, String[] to);
 }

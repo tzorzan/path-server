@@ -13,9 +13,9 @@ import java.util.List;
 public class MapQuestRouter implements Router {
 
   @Override
-  public List<PathRoutes.Feature> getRoute(String[] from, String[] to) {
+  public PathRoutes.Feature getRoute(String[] from, String[] to) {
     MapQuestQuery mqq = new MapQuestQuery(Double.valueOf(from[0]), Double.valueOf(from[1]),
         Double.valueOf(to[0]), Double.valueOf(to[1]));
-    return Arrays.asList(mqq.query().features);
+    return mqq.query().features[0];
   }
 }
