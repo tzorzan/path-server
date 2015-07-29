@@ -1,6 +1,7 @@
 package controllers;
 
 import implementations.MapQuestRouter;
+import implementations.SPDRouter;
 import interfaces.Router;
 import models.boundaries.PathRoutes;
 import org.geojson.Feature;
@@ -69,9 +70,11 @@ public class Api extends Controller {
         PathRoutes routes = new PathRoutes();
 
         PathRoutes.Feature mapQuestRoute = new MapQuestRouter().getRoute(from, to);
+        PathRoutes.Feature spdRoute = new SPDRouter().getRoute(from, to);
 
-        routes.features = new PathRoutes.Feature[1];
+        routes.features = new PathRoutes.Feature[2];
         routes.features[0] = mapQuestRoute;
+        routes.features[1] = spdRoute;
 
         routes.type = "FeatureCollection";
 

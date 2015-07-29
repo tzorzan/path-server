@@ -5,10 +5,12 @@ import com.vividsolutions.jts.geom.Point;
 import interfaces.Router;
 import models.NodedRoadSegment;
 import models.boundaries.PathRoutes;
+import play.Logger;
 import play.db.jpa.JPA;
 import utils.PGRouting;
 
 import javax.persistence.Query;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +21,11 @@ public class SPDRouter implements Router {
   private static String nearestPointQuery = "" +
       "SELECT" +
       "  id," +
-      "  ST_Distance(the_geom, ST_Point(:lon, :lat)) as distance " +
+      "  ST_Distance(the_geom, ST_Point(:lat, :lon)) as distance " +
       "FROM" +
-      "  roadsegment_noded_vertices_pgr" +
+      "  roadsegment_noded_vertices_pgr " +
       "ORDER BY" +
-      "  distance ASC" +
+      "  distance ASC " +
       "LIMIT 1";
 
   private static String routingQuery ="" +
@@ -34,12 +36,12 @@ public class SPDRouter implements Router {
       "   cost " +
       "FROM pgr_dijkstra(" +
       "text(" +
-      "  SELECT " +
+      "  'SELECT " +
       "    id," +
       "    source::integer," +
       "    target::integer," +
       "    ST_Length(ST_Transform(ST_SetSRID(linestring, 4326),2163)) as cost" +
-      "  FROM roadsegment_noded;), " +
+      "  FROM roadsegment_noded;'), " +
       "CAST (:start_vertex as integer), " +
       "CAST (:end_vertex as integer), " +
       "false, " +
@@ -63,27 +65,28 @@ public class SPDRouter implements Router {
     Integer counter = 0;
 
     //Find nearest vertex from start
-    Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(from[1])).setParameter("lat", Double.valueOf(from[0]));
+    Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lat", Double.valueOf(from[0])).setParameter("lon", Double.valueOf(from[1]));
     Object[] res = (Object[]) query.getSingleResult();
-    Long startId = (Long) res[0];
+    Long startId = ((BigInteger) res[0]).longValue();
 
 
     //Find nearest vertex from end
-    query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(to[1])).setParameter("lat", Double.valueOf(to[0]));
+    query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lat", Double.valueOf(to[0])).setParameter("lon", Double.valueOf(to[1]));
     res = (Object[]) query.getSingleResult();
-    Long endId = (Long) res[0];
+    Long endId = ((BigInteger) res[0]).longValue();
 
     //Calculate routing path using PGRouting
+    Logger.info("Start: " + startId + "  End: " + endId);
     query = JPA.em().createNativeQuery(routingQuery).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
 
     for (Object route : query.getResultList()) {
       Object[] resArray = (Object[]) route;
 
       // Punto da cui parte il tratto
-      Point node = PGRouting.getVertexPoint((Long) resArray[1]);
+      Point node = PGRouting.getVertexPoint(Long.valueOf((Integer) resArray[1]));
 
       // percorso per questo tratto
-      NodedRoadSegment segment = NodedRoadSegment.findById((Long) resArray[2]);
+      NodedRoadSegment segment = NodedRoadSegment.findById(Long.valueOf((Integer) resArray[2]));
       if(segment != null) {
         // aggiungo tutti i punti del tratto al percorso
         for(Coordinate c : segment.linestring.getCoordinates()) {
