@@ -21,7 +21,7 @@ public class SPDRouter implements Router {
   private static String nearestPointQuery = "" +
       "SELECT" +
       "  id," +
-      "  ST_Distance(the_geom, ST_Point(:lat, :lon)) as distance " +
+      "  ST_Distance(the_geom, ST_Point(:lon, :lat)) as distance " +
       "FROM" +
       "  roadsegment_noded_vertices_pgr " +
       "ORDER BY" +
@@ -65,13 +65,13 @@ public class SPDRouter implements Router {
     Integer counter = 0;
 
     //Find nearest vertex from start
-    Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lat", Double.valueOf(from[0])).setParameter("lon", Double.valueOf(from[1]));
+    Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(from[0])).setParameter("lat", Double.valueOf(from[1]));
     Object[] res = (Object[]) query.getSingleResult();
     Long startId = ((BigInteger) res[0]).longValue();
 
 
     //Find nearest vertex from end
-    query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lat", Double.valueOf(to[0])).setParameter("lon", Double.valueOf(to[1]));
+    query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(to[0])).setParameter("lat", Double.valueOf(to[1]));
     res = (Object[]) query.getSingleResult();
     Long endId = ((BigInteger) res[0]).longValue();
 
@@ -91,8 +91,8 @@ public class SPDRouter implements Router {
         // aggiungo tutti i punti del tratto al percorso
         for(Coordinate c : segment.linestring.getCoordinates()) {
           Double[] coords = new Double[2];
-          coords[0] = c.x;
-          coords[1] = c.y;
+          coords[0] = c.y;
+          coords[1] = c.x;
           f.geometry.coordinates.add(coords);
         }
 
