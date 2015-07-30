@@ -105,19 +105,20 @@ public class MapMatching extends Controller {
                     points.add(new Coordinate(pe.lat, pe.lon));
             }
 
-            segments.add(fact.createLineString(points.toArray(new Coordinate[points.size()])));
-        }
+          LineString l = fact.createLineString(points.toArray(new Coordinate[points.size()]));
 
-        for(LineString l : segments) {
-            RoadSegment s = RoadSegment.find("linestring = ?", l).first();
-            if(s == null) {
-                s = new RoadSegment();
-                s.linestring = fact.createLineString(l.getCoordinates());
-                s.save();
-                Logger.debug("Aggiungo nuovo segmento (" + s.id + ").");
-            } else {
-                Logger.trace("Segmento già presente.");
-            }
+          RoadSegment s = RoadSegment.find("linestring = ?", l).first();
+          if(s == null) {
+            s = new RoadSegment();
+            s.linestring = fact.createLineString(l.getCoordinates());
+            s.name = e.tags.name;
+            s.save();
+            Logger.debug("Aggiungo: " + e.tags.name + " (" + s.id + ").");
+          } else {
+            Logger.trace(e.tags.name + " già presente.");
+          }
+
+          segments.add(l);
         }
 
         //TODO: Aggiornare roadsegment_noded

@@ -2,6 +2,7 @@ package utils;
 
 import com.google.gson.Gson;
 import models.boundaries.OverpassResponse;
+import play.Logger;
 
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -20,6 +21,7 @@ public class OverpassQuery {
     }
 
     public OverpassResponse query() {
+        Logger.debug("Overpass Query: " + query);
         try {
             URL overpass = new URL(OVERPASS_API);
             HttpURLConnection connection = (HttpURLConnection) overpass.openConnection();

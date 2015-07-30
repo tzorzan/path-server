@@ -13,6 +13,8 @@ public class RoadSegment extends Model{
     @Type(type="org.hibernatespatial.GeometryUserType")
     public LineString linestring;
 
+    public String name;
+
     @OneToMany(mappedBy = "roadSegment")
     public List<Sample> samples;
 }

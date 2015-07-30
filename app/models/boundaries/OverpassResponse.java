@@ -14,6 +14,13 @@ public class OverpassResponse {
         public Double lat;
         public Double lon;
         public Long[] nodes;
+        public Tag tags;
+
+        public static class Tag {
+            public String name;
+
+            public Tag() {}
+        }
 
         public Element() {}
     };
