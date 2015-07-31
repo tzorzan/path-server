@@ -1,0 +1,28 @@
+#{extends 'leaflet.html' /}
+#{set title:'Route' /}
+
+<h1>Route</h1>
+<p>
+Routing from: ${params.from} to: ${params.to}
+</p>
+
+<div id="map" style="height: 420px"></div>
+
+<script>
+var map = L.map('map',{
+                        zoom: 18,
+   						maxZoom: 22
+					});
+
+L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
+
+var feature = L.geoJson(${geoJson.raw()}).addTo(map);
+
+map.fitBounds(feature.getBounds());
+
+</script>
+
+<h3>Info</h3>
+<div>
+    ${geoJson}
+</div>
