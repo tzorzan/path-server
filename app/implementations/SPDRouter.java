@@ -1,6 +1,7 @@
 package implementations;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import interfaces.Router;
 import models.NodedRoadSegment;
@@ -12,6 +13,8 @@ import utils.PGRouting;
 import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -89,7 +92,19 @@ public class SPDRouter implements Router {
       NodedRoadSegment segment = NodedRoadSegment.findById(Long.valueOf((Integer) resArray[2]));
       if(segment != null) {
         // aggiungo tutti i punti del tratto al percorso
-        for(Coordinate c : segment.linestring.getCoordinates()) {
+        List<Coordinate> coordsList= Arrays.asList(segment.linestring.getCoordinates());
+
+        // verifico se è necessario invertire l'ordine delle coordinate
+        // dato che uso i segmenti per entrambi i sensi di marcia
+        Point sf =  new GeometryFactory().createPoint(coordsList.get(0));
+        Point sl =  new GeometryFactory().createPoint(coordsList.get(coordsList.size()-1));
+
+        if(!node.equals(sf) && PGRouting.distance(node, sl) < PGRouting.distance(node, sf)) {
+          Logger.debug("Reverse segment " + segment.id + " in " + segment.roadSegment.name);
+          Collections.reverse(coordsList);
+        }
+
+        for(Coordinate c : coordsList) {
           Double[] coords = new Double[2];
           coords[0] = c.y;
           coords[1] = c.x;
@@ -102,9 +117,9 @@ public class SPDRouter implements Router {
 
           PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
           route_maneuver.iconUrl = "icona";
-          route_maneuver.narrative = "descrizione narrativa";
+          route_maneuver.narrative = segment.roadSegment.name!=null?"Svolta in "+segment.roadSegment.name:"";
           route_maneuver.streets = new String[1];
-          route_maneuver.streets[0] = "Street id: " + segment.roadSegment.id;
+          route_maneuver.streets[0] = segment.roadSegment.name!=null?segment.roadSegment.name:"";
           maneuvers.add(route_maneuver);
 
           maneuverIndexes.add(counter);

@@ -7,9 +7,9 @@ import play.jobs.Job;
 
 import javax.persistence.Query;
 
-@Every("150s")
+@Every("30s")
 public class UpdateNetworkEdges extends Job {
-  public static final Double tolerance = 0.00001;
+  public static final Double tolerance = 0.000001;
 	public void doJob() {
         /*
          *  Aggiorno le tabelle che rappresentano la Noded Network e la Network Topology
