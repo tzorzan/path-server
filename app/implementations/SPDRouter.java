@@ -121,11 +121,11 @@ public class SPDRouter implements Router {
         // se il segmento è cambiato allora aggiungo le informazioni per la svolta
         if(lastSegment.id != segment.roadSegment.id) {
           PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
-          String via = segment.roadSegment.name!=null?" in "+segment.roadSegment.name:"";
+          String via = segment.roadSegment.name!=null?segment.roadSegment.name:"";
           String azione = via.equals(lastSegment.name)?"Prosegui":"Svolta";
 
           route_maneuver.iconUrl = "icona";
-          route_maneuver.narrative = azione + via;
+          route_maneuver.narrative = azione + (via.equals("")?"":" in ") + via;
           route_maneuver.streets = new String[1];
           route_maneuver.streets[0] = via;
 
