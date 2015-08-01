@@ -1,0 +1,5 @@
+/* override cursor */
+
+.leaflet-overlay-pane {
+	cursor: crosshair !important;
+	}

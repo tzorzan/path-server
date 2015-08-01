@@ -1,3 +1,4 @@
+#{stylesheet src:'pointer.css' /}
 #{extends 'leaflet.html' /}
 #{set title:'Route' /}
 
@@ -19,6 +20,10 @@ L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').a
 var feature = L.geoJson(${geoJson.raw()}).addTo(map);
 
 map.fitBounds(feature.getBounds());
+
+map.on('click', function(e) {
+    alert("Lat, Lon : " + e.latlng.lat + "," + e.latlng.lng)
+});
 
 </script>
 
