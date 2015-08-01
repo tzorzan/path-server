@@ -4,30 +4,63 @@
 
 <h1>Route</h1>
 <p>
-Routing from: ${params.from} to: ${params.to}
+Routing from: <img src="/public/images/marker-icon-green.png" style="width: 25px; height: 41px; margin-top: -41px;"> ${params.from} to: <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px; margin-top: -41px;"> ${params.to}
 </p>
 
-<div id="map" style="height: 420px"></div>
+<div id="map" style="height: 480px"></div>
 
 <script>
+var geoJson = ${geoJson.raw()};
 var map = L.map('map',{
                         zoom: 18,
-   						maxZoom: 22
+   						maxZoom: 18
 					});
 
 L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
 
-var feature = L.geoJson(${geoJson.raw()}).addTo(map);
+var feature = L.geoJson(geoJson).addTo(map);
 
-map.fitBounds(feature.getBounds());
+var greenIcon = L.icon({
+                    iconUrl: '/public/images/marker-icon-green.png',
+                    iconRetinaUrl: '/public/images/marker-icon-green@2x.png',
+                    iconSize: [25, 41],
+		            iconAnchor: [12, 41]
+                });
+
+var redIcon = L.icon({
+                    iconUrl: '/public/images/marker-icon-red.png',
+                    iconRetinaUrl: '/public/images/marker-icon-red@2x.png',
+                    iconSize: [25, 41],
+		            iconAnchor: [12, 41]
+                });
+
+L.marker([${spdRoute.geometry.coordinates.get(0)[1]},${spdRoute.geometry.coordinates.get(0)[0]}], {icon: greenIcon}).addTo(map);
+L.marker([${spdRoute.geometry.coordinates.get(spdRoute.geometry.coordinates.size()-1)[1]},${spdRoute.geometry.coordinates.get(spdRoute.geometry.coordinates.size()-1)[0]}], {icon: redIcon}).addTo(map);
+
+map.fitBounds(feature.getBounds(), {padding: [20, 20]});
 
 map.on('click', function(e) {
-    alert("Lat, Lon : " + e.latlng.lat + "," + e.latlng.lng)
-});
+    var lat = e.latlng.lat.toFixed(7);
+    var lon = e.latlng.lng.toFixed(7);
 
+    var content = '( ' + lat + ',' + lon + ' )<br/>' +
+                  'Start <a href="@{Application.route}?from='+lat+','+lon+'&to=${params.to}">from</a> here.<br/>' +
+                  'Go <a href="@{Application.route}?from=${params.from}&to='+lat+','+lon+'">to</a> here.';
+
+    var popup = L.popup().setLatLng(e.latlng).setContent(content).openOn(map);
+});
 </script>
 
 <h3>Info</h3>
 <div>
-    ${geoJson}
+    ${spdRoute.properties.comment} (${spdRoute.properties.distance.format('##')}m)
+    <ul>
+        %{
+            for (maneuver in spdRoute.properties.maneuvers) {
+        }%
+            <li>${maneuver.narrative}</li>
+        %{
+            }
+        }%
+    </ul>
 </div>

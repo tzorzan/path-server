@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import interfaces.Router;
 import models.NodedRoadSegment;
+import models.RoadSegment;
 import models.boundaries.PathRoutes;
 import play.Logger;
 import play.db.jpa.JPA;
@@ -61,10 +62,10 @@ public class SPDRouter implements Router {
     List<Integer> maneuverIndexes = new ArrayList<Integer>();
 
     f.properties = new PathRoutes.Properties();
-    f.properties.comment = "Shortest Path - PGRouting.";
+    f.properties.comment = "Shortest Path - PGRouting";
 
     Double length = 0.0;
-    Long lastSegmentId = null;
+    RoadSegment lastSegment = null;
     Integer counter = 0;
 
     //Find nearest vertex from start
@@ -91,6 +92,11 @@ public class SPDRouter implements Router {
       // percorso per questo tratto
       NodedRoadSegment segment = NodedRoadSegment.findById(Long.valueOf((Integer) resArray[2]));
       if(segment != null) {
+        //inizializzo lastSegment se sono alla prima iterazione
+        if(lastSegment==null) {
+          lastSegment = segment.roadSegment;
+        }
+
         // aggiungo tutti i punti del tratto al percorso
         List<Coordinate> coordsList= Arrays.asList(segment.linestring.getCoordinates());
 
@@ -112,21 +118,24 @@ public class SPDRouter implements Router {
         }
 
         length += (Double) resArray[3];
-        if(lastSegmentId != segment.roadSegment.id) {
-          // se il segmento è cambiato allora aggiungo le informazioni per la svolta
-
+        // se il segmento è cambiato allora aggiungo le informazioni per la svolta
+        if(lastSegment.id != segment.roadSegment.id) {
           PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
-          route_maneuver.iconUrl = "icona";
-          route_maneuver.narrative = segment.roadSegment.name!=null?"Svolta in "+segment.roadSegment.name:"";
-          route_maneuver.streets = new String[1];
-          route_maneuver.streets[0] = segment.roadSegment.name!=null?segment.roadSegment.name:"";
-          maneuvers.add(route_maneuver);
+          String via = segment.roadSegment.name!=null?" in "+segment.roadSegment.name:"";
+          String azione = via.equals(lastSegment.name)?"Prosegui":"Svolta";
 
+          route_maneuver.iconUrl = "icona";
+          route_maneuver.narrative = azione + via;
+          route_maneuver.streets = new String[1];
+          route_maneuver.streets[0] = via;
+
+          maneuvers.add(route_maneuver);
           maneuverIndexes.add(counter);
 
-          lastSegmentId = segment.roadSegment.id;
+          lastSegment = segment.roadSegment;
           counter += segment.linestring.getCoordinates().length;
         }
+
 
         f.properties.maneuvers = maneuvers.toArray(new PathRoutes.Maneuver[maneuvers.size()]);
         f.properties.maneuverIndexes = maneuverIndexes.toArray(new Integer[maneuverIndexes.size()]);

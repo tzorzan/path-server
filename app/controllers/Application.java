@@ -20,7 +20,7 @@ public class Application extends Controller {
 
         String geoJson = new Gson().toJson(spdRoute);
 
-        render(geoJson);
+        render(spdRoute, geoJson);
     }
 
 }
