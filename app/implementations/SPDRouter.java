@@ -1,7 +1,9 @@
 package implementations;
 
+import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import interfaces.Router;
 import models.NodedRoadSegment;
@@ -65,7 +67,8 @@ public class SPDRouter implements Router {
     f.properties.comment = "Shortest Path - PGRouting";
 
     Double length = 0.0;
-    RoadSegment lastSegment = null;
+    RoadSegment lastRoadSegment = null;
+    Point lastNode = null;
     Integer counter = 0;
 
     //Find nearest vertex from start
@@ -91,26 +94,13 @@ public class SPDRouter implements Router {
 
       // percorso per questo tratto
       NodedRoadSegment segment = NodedRoadSegment.findById(Long.valueOf((Integer) resArray[2]));
+
       if(segment != null) {
-        //inizializzo lastSegment se sono alla prima iterazione
-        if(lastSegment==null) {
-          lastSegment = segment.roadSegment;
-        }
+        //inizializzo lastSegment e lastNode se sono alla prima iterazione
+        lastRoadSegment = lastRoadSegment==null?segment.roadSegment:lastRoadSegment;
+        lastNode = lastNode==null?node:lastNode;
 
-        // aggiungo tutti i punti del tratto al percorso
-        List<Coordinate> coordsList= Arrays.asList(segment.linestring.getCoordinates());
-
-        // verifico se è necessario invertire l'ordine delle coordinate
-        // dato che uso i segmenti per entrambi i sensi di marcia
-        Point sf =  new GeometryFactory().createPoint(coordsList.get(0));
-        Point sl =  new GeometryFactory().createPoint(coordsList.get(coordsList.size()-1));
-
-        if(!node.equals(sf) && PGRouting.distance(node, sl) < PGRouting.distance(node, sf)) {
-          Logger.debug("Reverse segment " + segment.id + " in " + segment.roadSegment.name);
-          Collections.reverse(coordsList);
-        }
-
-        for(Coordinate c : coordsList) {
+        for(Coordinate c : getNextCoordinates(node, segment.linestring)) {
           Double[] coords = new Double[2];
           coords[0] = c.y;
           coords[1] = c.x;
@@ -119,10 +109,11 @@ public class SPDRouter implements Router {
 
         length += (Double) resArray[3];
         // se il segmento è cambiato allora aggiungo le informazioni per la svolta
-        if(lastSegment.id != segment.roadSegment.id) {
+        if(lastRoadSegment.id != segment.roadSegment.id) {
           PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
           String via = segment.roadSegment.name!=null?segment.roadSegment.name:"";
-          String azione = via.equals(lastSegment.name)?"Prosegui":"Svolta";
+          String direzione = getTurnDirection(segment.linestring, lastNode)==CGAlgorithms.LEFT?"sinistra":"destra";
+          String azione = via.equals(lastRoadSegment.name)?"Prosegui":"Svolta a " + direzione;
 
           route_maneuver.iconUrl = "icona";
           route_maneuver.narrative = azione + (via.equals("")?"":" in ") + via;
@@ -132,14 +123,14 @@ public class SPDRouter implements Router {
           maneuvers.add(route_maneuver);
           maneuverIndexes.add(counter);
 
-          lastSegment = segment.roadSegment;
           counter += segment.linestring.getCoordinates().length;
         }
-
 
         f.properties.maneuvers = maneuvers.toArray(new PathRoutes.Maneuver[maneuvers.size()]);
         f.properties.maneuverIndexes = maneuverIndexes.toArray(new Integer[maneuverIndexes.size()]);
 
+        lastRoadSegment = segment.roadSegment;
+        lastNode = node;
       }
     }
 
@@ -149,6 +140,23 @@ public class SPDRouter implements Router {
 
     // ritorno tutto il percorso come feature GEOJson
     return f;
+  }
+
+  private List<Coordinate> getNextCoordinates(Point node, LineString linestring) {
+    List<Coordinate> coordsList= Arrays.asList(linestring.getCoordinates());
+    Point sl =  new GeometryFactory().createPoint(coordsList.get(coordsList.size() - 1));
+
+    if(node.equals(sl)) {
+      Collections.reverse(coordsList);
+    }
+
+    return coordsList;
+  }
+
+  private int getTurnDirection(LineString segment, Point node) {
+    List<Coordinate> l = Arrays.asList(segment.getCoordinates());
+    // confronto l'ultimo nodo con il prossimo segmento, devo invertire il risultato
+    return CGAlgorithms.computeOrientation(l.get(l.size()-2), l.get(l.size()-1),node.getCoordinate())*-1;
   }
 
 }
