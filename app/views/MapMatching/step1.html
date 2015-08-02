@@ -1,23 +1,27 @@
 #{extends 'leaflet.html' /}
 #{set title:'MapMatching - step1' /}
 
-<h1>Step1</h1>
-<p>
-Punti del campionamento e relativo bounding box allargata.
-Tutti i segmenti inclusi nella bounding box sono inseriti a sistema.
-</p>
-
-<div id="map" style="height: 420px"></div>
+<div class="row">
+	<div class="col-md-12">
+		Punti del campionamento e relativo bounding box allargata.
+		Tutti i segmenti inclusi nella bounding box sono inseriti a sistema.
+	</div>
+</div>
+<div class="row" style="height: 100%;">
+	<div class="col-md-12" style="height: 100%;">
+		<div id="map"></div>
+	</div>
+</div>
 
 <script>
 onload=function(){
 	var map = L.map('map',{
-    						maxZoom: 22
+    						maxZoom: 18
 						});
 	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
 
     //Draw bounding box
-	L.rectangle([[${boundingbox.getMinX()}, ${boundingbox.getMaxY()}], [${boundingbox.getMaxX()}, ${boundingbox.getMinY()}]],
+	var bb = L.rectangle([[${boundingbox.getMinX()}, ${boundingbox.getMaxY()}], [${boundingbox.getMaxX()}, ${boundingbox.getMinY()}]],
 	{
 	    color: "#ff7800",
 	    fillOpacity: 0.06
@@ -44,6 +48,6 @@ onload=function(){
 	#{/list}
 
 
-    map.fitBounds([[${boundingbox.getMinX()}, ${boundingbox.getMinY()}], [${boundingbox.getMaxX()}, ${boundingbox.getMaxY()}]]);
+    map.fitBounds(bb.getBounds(), {padding: [20, 20]});
 }();
 </script>

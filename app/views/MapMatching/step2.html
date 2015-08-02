@@ -1,12 +1,32 @@
 #{extends 'leaflet.html' /}
 #{set title:'MapMatching - step2' /}
 
-<h1>Step2</h1>
-<p>
-Punto di campionamento e proiezione dei candidati nei segmenti adiacenti.
-</p>
+<div class="row">
+    <div class="col-md-12">
+        Posizione del campionamento e proiezione dei candidati nei segmenti adiacenti.
 
-<div id="map" style="height: 420px"></div>
+        <h4>Samples</h4>
+        <ul class="list-inline">
+            <li><a href="#" onclick="leftArrowPressed();"><<</a></li>
+        %{
+        n = 0;
+        for(sample in path.samples) {
+        }%
+            <li><a href="#" onclick="showCandidates(${n});">${n}</a></li>
+        %{
+          n++;
+        }
+        }%
+            <li><a href="#" onclick="rightArrowPressed();">>></a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="row" style="height: 100%;">
+    <div class="col-md-12" style="height: 100%;">
+        <div id="map"></div>
+    </div>
+</div>
 
 <script>
 L.InfoCircleMarker = L.CircleMarker.extend({
@@ -120,18 +140,3 @@ document.onkeydown = function(evt) {
     }
 };
 </script>
-
-<h3>Samples</h3>
-<ul>
-    <a href="#" onclick="leftArrowPressed();"><<</a>&nbsp;
-    %{
-    n = 0;
-    for(sample in path.samples) {
-    }%
-        <a href="#" onclick="showCandidates(${n});">${n}</a>
-    %{
-        n++;
-    }
-    }%
-    &nbsp;<a href="#" onclick="rightArrowPressed();">>></a>
-</ul>

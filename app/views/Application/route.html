@@ -1,13 +1,35 @@
 #{stylesheet src:'pointer.css' /}
 #{extends 'leaflet.html' /}
 #{set title:'Route' /}
+<div class="row" style="height: 100%;">
+    <div class="col-md-8" style="height: 100%;">
+        <div id="map"></div>
+    </div>
+    <div class="col-md-4">
+        <h4>Route Info</h4>
+        <h6>Click on the map to change <strong>start</strong> or <strong>destination</strong>.</h6>
 
-<h1>Route</h1>
-<p>
-Routing from: <img src="/public/images/marker-icon-green.png" style="width: 25px; height: 41px; margin-top: -41px;"> ${params.from} to: <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px; margin-top: -41px;"> ${params.to}
-</p>
+        <ul class="list-unstyled">
+            <li>from: <img src="/public/images/marker-icon-green.png" style="width: 25px; height: 41px;"> ${params.from}</li>
+            <li>to: <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px;"> ${params.to}</li>
+        </ul>
 
-<div id="map" style="height: 480px"></div>
+        <div>
+            ${spdRoute.properties.comment} (${spdRoute.properties.distance.format('##')}m)
+            <ul>
+                %{
+                for (maneuver in spdRoute.properties.maneuvers) {
+                }%
+                <li>${maneuver.narrative}</li>
+                %{
+                }
+                }%
+            </ul>
+        </div>
+    </div>
+</div>
+
+
 
 <script>
 var geoJson = ${geoJson.raw()};
@@ -43,24 +65,17 @@ map.on('click', function(e) {
     var lat = e.latlng.lat.toFixed(7);
     var lon = e.latlng.lng.toFixed(7);
 
-    var content = '( ' + lat + ',' + lon + ' )<br/>' +
-                  'Start <a href="@{Application.route}?from='+lat+','+lon+'&to=${params.to}">from</a> here.<br/>' +
-                  'Go <a href="@{Application.route}?from=${params.from}&to='+lat+','+lon+'">to</a> here.';
+    var content = '<h6>Position</h6>' +
+                  '<small>( ' + lat + ',' + lon + ' )</small>' +
+                  '<div class="btn-group btn-group-sm btn-group-justified" role="group" style="margin-top:6px;">' +
+                  '  <div class="btn-group" role="group">' +
+                  '    <button type="button" class="btn btn-success" onclick="location.href=\'@{Application.route}?from='+lat+','+lon+'&to=${params.to}\'">from</button>' +
+                  '  </div>' +
+                  '  <div class="btn-group" role="group">' +
+                  '    <button type="button" class="btn btn-danger" onclick="location.href=\'@{Application.route}?from=${params.from}&to='+lat+','+lon+'\'">to</button>' +
+                  '  </div>' +
+                  '</div>';
 
     var popup = L.popup().setLatLng(e.latlng).setContent(content).openOn(map);
 });
 </script>
-
-<h3>Info</h3>
-<div>
-    ${spdRoute.properties.comment} (${spdRoute.properties.distance.format('##')}m)
-    <ul>
-        %{
-            for (maneuver in spdRoute.properties.maneuvers) {
-        }%
-            <li>${maneuver.narrative}</li>
-        %{
-            }
-        }%
-    </ul>
-</div>
