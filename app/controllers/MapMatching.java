@@ -166,7 +166,7 @@ public class MapMatching extends Controller {
     }
 
     public static void list() {
-        List<Path> paths = Path.findAll();
+        List<Path> paths = Path.find("order by sent desc").fetch();
         String link_step1 = Router.reverse("MapMatching.step1").url;
         String link_step2 = Router.reverse("MapMatching.step2").url;
         String link_step3 = Router.reverse("MapMatching.step3").url;
