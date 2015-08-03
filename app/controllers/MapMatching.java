@@ -69,7 +69,7 @@ public class MapMatching extends Controller {
 
     private static Path getPathOrLast(String parameter) {
         if(parameter == null) {
-            Sample sample = Sample.find("byLoaded", false).first();
+            Sample sample = Sample.all().first();
             return sample.path;
         } else {
             return Path.findById(Long.valueOf(parameter));
