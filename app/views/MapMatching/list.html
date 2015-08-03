@@ -1,5 +1,6 @@
 #{extends 'main.html' /}
-#{set title:'MapMatching - list' /}
+#{set title:'MapMatching' /}
+#{set subtitle:'List all samples' /}
 
 <div class="row">
     <div class="col-md-12">
@@ -12,6 +13,7 @@
         <thead>
             <tr>
                 <th>#</th>
+                <th>Date</th>
                 <th>Step 1</th>
                 <th>Step 2</th>
                 <th>Step 3</th>
@@ -22,6 +24,7 @@
     #{list items:paths, as:'path'}
         <tr>
             <th scope="row">${path.id}</th>
+            <td>${path.sent.format('dd MMMM yyyy hh:mm:ss')}</td>
             <td><a href="${link_step1}/${path.id}">Step 1</a></td>
             <td><a href="${link_step2}/${path.id}">Step 2</a></td>
             <td><a href="${link_step3}/${path.id}">Step 3</a></td>
