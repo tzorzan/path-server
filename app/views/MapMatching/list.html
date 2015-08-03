@@ -1,14 +1,32 @@
 #{extends 'main.html' /}
 #{set title:'MapMatching - list' /}
 
-<h1>List</h1>
-<p>
-Lista dei path registrati a sistema:
+<div class="row">
+    <div class="col-md-12">
+        Lista dei path registrati a sistema:
+    </div>
+</div>
 
-    <ul>
+<div class="container panel panel-default">
+    <table class="table table-condensed table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Step 1</th>
+                <th>Step 2</th>
+                <th>Step 3</th>
+            </tr>
+        </thead>
+        <tbody>
+
     #{list items:paths, as:'path'}
-        <li>${path.id} [ <a href="${link_step1}/${path.id}">step 1</a> - <a href="${link_step2}/${path.id}">step 2</a> - <a href="${link_step3}/${path.id}">step 3</a> ]</li>
+        <tr>
+            <th scope="row">${path.id}</th>
+            <td><a href="${link_step1}/${path.id}">Step 1</a></td>
+            <td><a href="${link_step2}/${path.id}">Step 2</a></td>
+            <td><a href="${link_step3}/${path.id}">Step 3</a></td>
+        </tr>
     #{/list}
-    </ul>
-
-</p>
+        </tbody>
+    </table>
+</div>
