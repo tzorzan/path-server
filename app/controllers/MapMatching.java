@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.*;
+import jobs.UpdateNetworkEdges;
 import models.*;
 import models.NodedRoadSegment;
 import models.boundaries.OverpassResponse;
@@ -121,7 +122,7 @@ public class MapMatching extends Controller {
           segments.add(l);
         }
 
-        //TODO: Aggiornare roadsegment_noded
+      UpdateNetworkEdges.updateNetworEdges();
 
         return segments;
     }
@@ -178,7 +179,7 @@ public class MapMatching extends Controller {
         if(path == null)
             notFound("Path with id: " + parameter + " not found.");
 
-    	List<Sample> samples = path.samples;
+    	  List<Sample> samples = path.samples;
         Envelope boundingbox = getBoundingBox(path);
         List<LineString> segments = addBoundingBoxRoadSegments(path);
 

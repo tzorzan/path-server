@@ -8,20 +8,22 @@
     <div class="col-md-12">
         Posizione del campionamento e proiezione dei candidati nei segmenti adiacenti.
 
-        <h4>Samples</h4>
-        <ul class="list-inline">
-            <li><a href="#" onclick="leftArrowPressed();"><<</a></li>
-        %{
-        n = 0;
-        for(sample in path.samples) {
-        }%
-            <li><a href="#" onclick="showCandidates(${n});">${n}</a></li>
-        %{
-          n++;
-        }
-        }%
-            <li><a href="#" onclick="rightArrowPressed();">>></a></li>
-        </ul>
+        <div class="well">
+            <h6>Usa i tasti <strong>&larr;</strong> o <strong>&rarr;</strong> per cambiare punto.</h6>
+            <ul class="list-inline">
+                <li><a href="#" onclick="leftArrowPressed();"><<</a></li>
+            %{
+            n = 0;
+            for(sample in path.samples) {
+            }%
+                <li><a href="#" onclick="showCandidates(${n});">${n}</a></li>
+            %{
+              n++;
+            }
+            }%
+                <li><a href="#" onclick="rightArrowPressed();">>></a></li>
+            </ul>
+        </div>
     </div>
 </div>
 
