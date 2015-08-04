@@ -33,7 +33,7 @@ public class STMapMatching {
         Double shortest_path = PGRouting.getCandidatesRoutingLength(candidateT, candidateS);
 
         Double value = eucl_distance / shortest_path;
-        Logger.debug("Transmission probabilty " + candidateT + " - " + candidateS + " = " + df.format(eucl_distance) + " / " + df.format(shortest_path) + " = " + df.format(value));
+        Logger.trace("Transmission probabilty " + candidateT + " - " + candidateS + " = " + df.format(eucl_distance) + " / " + df.format(shortest_path) + " = " + df.format(value));
         return value;
     }
 
@@ -53,7 +53,6 @@ public class STMapMatching {
             f_1.add(observationProbability(c_s));
         }
         f.add(f_1);
-        Logger.debug("");
 
         // Valorizzo tutto f[] e pre[]
         for(int i=1; i < candidatesGraph.size(); i++) {
@@ -80,7 +79,6 @@ public class STMapMatching {
             }
             f.add(f_c_s);
             pre.add(pre_c_s);
-            Logger.debug("");
         }
 
         // Costruisco la lista con il match
