@@ -9,6 +9,7 @@ require:
     - provided -> gt-metadata 13.2
     - provided -> gt-opengis 13.2
     - provided -> gt-referencing 13.2
+    - provided -> vecmath 1.3.2
     - org.jscience -> jscience 4.3.1
     - de.grundid.opendatalab -> geojson-jackson 1.2
     - provided -> hibernate-spatial 1.1.1
