@@ -13,11 +13,11 @@ POST    /api/data                               Api.data
 GET     /api/route                              Api.route
 
 # Ignore favicon requests
-GET     /favicon.ico                            404
+GET     /favicon.ico                            staticFile:public/images/favicon.ico
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
 
 # Catch all
 *       /{controller}/{action}/{parameter}     {controller}.{action}
-*       /{controller}/{action}                  {controller}.{action}
+*       /{controller}/{action}                 {controller}.{action}
