@@ -7,7 +7,7 @@ import play.jobs.Job;
 
 import javax.persistence.Query;
 
-@Every("300s")
+@Every("10m")
 public class UpdateNetworkEdges extends Job {
   public static final Double tolerance = 0.000001;
 	public void doJob() {
