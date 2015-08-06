@@ -12,8 +12,9 @@
     <table class="table table-condensed table-hover">
         <thead>
             <tr>
-                <th>#</th>
+                <th>ID</th>
                 <th>Date</th>
+                <th># of Samples</th>
                 <th>Step 1</th>
                 <th>Step 2</th>
                 <th>Step 3</th>
@@ -25,6 +26,7 @@
         <tr>
             <th scope="row">${path.id}</th>
             <td>${path.sent.format('dd MMMM yyyy hh:mm:ss')}</td>
+            <td>${path.samples.size()}</td>
             <td><a href="${link_step1}/${path.id}">Step 1</a></td>
             <td><a href="${link_step2}/${path.id}">Step 2</a></td>
             <td><a href="${link_step3}/${path.id}">Step 3</a></td>
