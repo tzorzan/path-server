@@ -138,6 +138,10 @@ public class MapMatching extends Controller {
     }
 
     if(newAdded) {
+      //Force commit transaction
+      JPA.em().flush();
+      JPA.em().getTransaction().commit();
+
       //Schedule Topology Update
       new UpdateNetworkEdges().now();
     }
