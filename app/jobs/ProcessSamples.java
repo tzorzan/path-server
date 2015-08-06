@@ -7,7 +7,7 @@ import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
 
-@Every("60s")
+@Every("120s")
 public class ProcessSamples extends Job {
 
   public void doJob() {
