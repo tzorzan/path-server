@@ -1,36 +1,40 @@
 #{stylesheet src:'pointer.css' /}
 #{extends 'leaflet.html' /}
 #{set title:'Route' /}
+#{set subtitle: 'Click on the map to change start or destination.' /}
 
 <div class="row" style="height: 100%;">
     <div class="col-md-8" style="height: 100%;">
         <div id="map"></div>
     </div>
     <div class="col-md-4">
-        <h4>Route Info</h4>
-        <h6>Click on the map to change <strong>start</strong> or <strong>destination</strong>.</h6>
+        <h4>Routes</h4>
+        <div class="well">
+            <img src="/public/images/marker-icon-green.png" style="width: 25px; height: 41px;"> [ ${params.from} ]
+            <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px;"> [ ${params.to} ]
+        </div>
 
-        <ul class="list-unstyled">
-            <li>from: <img src="/public/images/marker-icon-green.png" style="width: 25px; height: 41px;"> ${params.from}</li>
-            <li>to: <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px;"> ${params.to}</li>
-        </ul>
-
+        %{
+          for (feature in routes.features) {
+        }%
         <div>
-            ${spdRoute.properties.comment} (${spdRoute.properties.distance.format('##')}m)
+            ${feature.properties.comment} (${feature.properties.distance.format('##')}m)
             <ul>
                 %{
-                for (maneuver in spdRoute.properties.maneuvers) {
+                for (maneuver in feature.properties.maneuvers) {
                 }%
-                <li>${maneuver.narrative}</li>
+                <li><img src="${maneuver.iconUrl}"/> ${maneuver.narrative}</li>
                 %{
                 }
                 }%
             </ul>
         </div>
+        %{
+          }
+        }%
+
     </div>
 </div>
-
-
 
 <script>
 var geoJson = ${geoJson.raw()};
@@ -57,9 +61,6 @@ var redIcon = L.icon({
 		            iconAnchor: [12, 41]
                 });
 
-L.marker([${spdRoute.geometry.coordinates.get(0)[1]},${spdRoute.geometry.coordinates.get(0)[0]}], {icon: greenIcon}).addTo(map);
-L.marker([${spdRoute.geometry.coordinates.get(spdRoute.geometry.coordinates.size()-1)[1]},${spdRoute.geometry.coordinates.get(spdRoute.geometry.coordinates.size()-1)[0]}], {icon: redIcon}).addTo(map);
-
 map.fitBounds(feature.getBounds(), {padding: [20, 20]});
 
 map.on('click', function(e) {
@@ -67,7 +68,7 @@ map.on('click', function(e) {
     var lon = e.latlng.lng.toFixed(7);
 
     var content = '<h6>Position</h6>' +
-                  '<small>( ' + lat + ',' + lon + ' )</small>' +
+                  '<small>[ ' + lat + ',' + lon + ' ]</small>' +
                   '<div class="btn-group btn-group-sm btn-group-justified" role="group" style="margin-top:6px;">' +
                   '  <div class="btn-group" role="group">' +
                   '    <button type="button" class="btn btn-success" onclick="location.href=\'@{Application.route}?from='+lat+','+lon+'&to=${params.to}\'">from</button>' +

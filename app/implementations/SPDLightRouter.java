@@ -1,30 +1,18 @@
 package implementations;
 
-import com.vividsolutions.jts.algorithm.CGAlgorithms;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import interfaces.Router;
-import models.NodedRoadSegment;
-import models.RoadSegment;
+import java.math.BigInteger;
+import javax.persistence.Query;
 import models.boundaries.PathRoutes;
 import play.Logger;
 import play.db.jpa.JPA;
-import utils.PGRouting;
+import interfaces.Router;
+import play.mvc.Http;
 import utils.RouteResult;
-
-import javax.persistence.Query;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Router implementation using Dijkstra Shortest Path algorithm.
  */
-public class SPDRouter implements Router {
+public class SPDLightRouter implements Router  {
   private static String nearestPointQuery = "" +
       "SELECT" +
       "  id," +
@@ -44,11 +32,19 @@ public class SPDRouter implements Router {
       "FROM pgr_dijkstra(" +
       "text(" +
       "  'SELECT " +
-      "    id," +
-      "    source::integer," +
-      "    target::integer," +
-      "    ST_Length(ST_Transform(ST_SetSRID(linestring, 4326),2163)) as cost" +
-      "  FROM roadsegment_noded;'), " +
+      "  r.id," +
+      "  r.source::integer," +
+      "  r.target::integer," +
+      "  m_len(linestring) as length_cost, " +
+      "  avg(COALESCE(l.value, 0)) as label_value, " +
+      "  m_len(linestring) + (0.25 * ((avg(COALESCE(l.value, 0)))/100) * m_len(linestring)) as cost " +
+      "FROM " +
+      "  roadsegment_noded as r " +
+      "LEFT OUTER JOIN light_sample as l ON r.id = l.roadsegment_id AND l.time_class = time_class(localtimestamp) " +
+      "GROUP BY " +
+      "  r.id," +
+      "  r.source::integer," +
+      "  r.target::integer;'), " +
       "CAST (:start_vertex as integer), " +
       "CAST (:end_vertex as integer), " +
       "false, " +
@@ -60,7 +56,6 @@ public class SPDRouter implements Router {
     Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(from[0])).setParameter("lat", Double.valueOf(from[1]));
     Object[] res = (Object[]) query.getSingleResult();
     Long startId = ((BigInteger) res[0]).longValue();
-
 
     //Find nearest vertex from end
     query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(to[0])).setParameter("lat", Double.valueOf(to[1]));
@@ -79,30 +74,13 @@ public class SPDRouter implements Router {
     f.geometry.coordinates = r.coordinates;
 
     f.properties = new PathRoutes.Properties();
-    f.properties.comment = "Shortest Path - generato con PGRouting";
+    f.properties.comment = "Less Light - generato con PGRouting";
     f.properties.distance = r.length;
     f.properties.maneuvers = r.maneuvers.toArray(new PathRoutes.Maneuver[r.maneuvers.size()]);
     f.properties.maneuverIndexes = r.maneuverIndexes.toArray(new Integer[r.maneuverIndexes.size()]);
 
     // ritorno tutto il percorso come feature GEOJson
     return f;
-  }
-
-  private List<Coordinate> getNextCoordinates(Point node, LineString linestring) {
-    List<Coordinate> coordsList= Arrays.asList(linestring.getCoordinates());
-    Point sl =  new GeometryFactory().createPoint(coordsList.get(coordsList.size() - 1));
-
-    if(node.equals(sl)) {
-      Collections.reverse(coordsList);
-    }
-
-    return coordsList;
-  }
-
-  private int getTurnDirection(LineString segment, Point node) {
-    List<Coordinate> l = Arrays.asList(segment.getCoordinates());
-    // confronto l'ultimo nodo con il prossimo segmento, devo invertire il risultato
-    return CGAlgorithms.computeOrientation(l.get(l.size()-2), l.get(l.size()-1),node.getCoordinate())*-1;
   }
 
 }

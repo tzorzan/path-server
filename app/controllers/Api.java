@@ -1,21 +1,20 @@
 package controllers;
 
 import implementations.MapQuestRouter;
+import implementations.SPDLightRouter;
 import implementations.SPDRouter;
-import interfaces.Router;
 import models.boundaries.PathRoutes;
 import org.geojson.Feature;
 import org.geojson.Point;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.geojson.FeatureCollection;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import models.*;
 import play.Logger;
+import play.libs.F;
 import play.mvc.Controller;
+import utils.RouteJob;
 
 public class Api extends Controller {
 	public static void data() {
@@ -69,12 +68,14 @@ public class Api extends Controller {
 
         PathRoutes routes = new PathRoutes();
 
-        //PathRoutes.Feature mapQuestRoute = new MapQuestRouter().getRoute(from, to);
-        PathRoutes.Feature spdRoute = new SPDRouter().getRoute(from, to);
+        F.Promise<PathRoutes.Feature> spdRouteJobResult = new RouteJob(new SPDRouter(), from, to).now();
+        F.Promise<PathRoutes.Feature> spdLightRouteJobResult = new RouteJob(new SPDLightRouter(), from, to).now();
+        F.Promise<PathRoutes.Feature> mapQuestRouteJobResult = new RouteJob(new MapQuestRouter(), from, to).now();
 
-        routes.features = new PathRoutes.Feature[1];
-        //routes.features[0] = mapQuestRoute;
-        routes.features[0] = spdRoute;
+        F.Promise<List<PathRoutes.Feature>> jobList = F.Promise.waitAll(spdRouteJobResult, spdLightRouteJobResult, mapQuestRouteJobResult);
+        List<PathRoutes.Feature> resultList = await(jobList);
+
+        routes.features = resultList.toArray(new PathRoutes.Feature[resultList.size()]);
 
         routes.type = "FeatureCollection";
 

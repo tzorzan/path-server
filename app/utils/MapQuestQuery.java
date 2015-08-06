@@ -16,7 +16,7 @@ import java.util.Locale;
 public class MapQuestQuery {
     private static final String MAPQUEST_WS = "http://open.mapquestapi.com/directions/v2";
     private static final String MAPQUEST_KEY = "Fmjtd%%7Cluur2huz2h%%2Crn%%3Do5-9wa0h0";
-    private static final String MAPQUEST_QUERY_ROUTE_FORMAT = MAPQUEST_WS + "/route?key=" + MAPQUEST_KEY + "&outFormat=json&routeType=pedestrian&doReverseGeocode=true&narrativeType=text&shapeFormat=raw&unit=m&manMaps=false&locale=it_IT&from=%.6f,%.6f&to=%.6f,%.6f";
+    private static final String MAPQUEST_QUERY_ROUTE_FORMAT = MAPQUEST_WS + "/route?key=" + MAPQUEST_KEY + "&outFormat=json&routeType=pedestrian&doReverseGeocode=true&narrativeType=text&shapeFormat=raw&unit=k&manMaps=false&locale=it_IT&from=%.6f,%.6f&to=%.6f,%.6f";
     private static final String MAPQUEST_QUERY_SHAPE_FORMAT = MAPQUEST_WS + "/routeshape?key=" + MAPQUEST_KEY + "&json={sessionId:%s,mapState:{width:1000,height:1000,zoom:16,center:{lat:%.6f,lng:%.6f}}}";
 
     private Double fromLat;
@@ -69,7 +69,7 @@ public class MapQuestQuery {
         }
         routes.features[0].properties = new PathRoutes.Properties();
         routes.features[0].properties.comment = "Generato con servizio MapQuest.";
-        routes.features[0].properties.distance = routeResponse.route.distance;
+        routes.features[0].properties.distance = routeResponse.route.distance * 1000;
 
         List<PathRoutes.Maneuver> maneuvers = new ArrayList<PathRoutes.Maneuver>();
         for(MapQuestResponse.Maneuver mapquest_maneuver : routeResponse.route.legs[0].maneuvers) {
@@ -80,7 +80,6 @@ public class MapQuestQuery {
             maneuvers.add(route_maneuver);
         }
         routes.features[0].properties.maneuvers = maneuvers.toArray(new PathRoutes.Maneuver[maneuvers.size()]);
-
         routes.features[0].properties.maneuverIndexes = shapeResponse.route.shape.maneuverIndexes;
 
         return routes;
