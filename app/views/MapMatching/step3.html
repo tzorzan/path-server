@@ -48,7 +48,7 @@ var segments = [
   #{list items:segments, as:'matchingsegment'}
     [
     #{list items:matchingsegment.getCoordinates(), as:'coordinate'}
-        [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
+        [${coordinate.y}, ${coordinate.x}]${coordinate_isLast ?'':',' }
     #{/list}
     ]${matchingsegment_isLast ?'':',' }
   #{/list}

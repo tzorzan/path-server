@@ -22,10 +22,10 @@ public class CandidatePoint extends Model {
 
     @Transient
     public Point getPoint() {
-        return new GeometryFactory().createPoint(new Coordinate(this.latitude, this.longitude));
+        return new GeometryFactory().createPoint(new Coordinate(this.longitude, this.latitude));
     }
 
-    public CandidatePoint(Double latitude, Double longitude) {
+    public CandidatePoint(Double longitude, Double latitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }

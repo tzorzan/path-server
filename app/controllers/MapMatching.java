@@ -50,21 +50,21 @@ public class MapMatching extends Controller {
     "WHERE" +
     " ST_DWithin(" +
     "  ST_Transform(ST_SetSRID(s.linestring, 4326),2163)," +
-    "  ST_Transform(ST_SetSRID(ST_Point(:sample_latitude, :sample_longitude), 4326),2163)," +
+    "  ST_Transform(ST_SetSRID(ST_Point(:sample_longitude, :sample_latitude), 4326),2163)," +
     "  :tolerance" +
     ")";
   private static final String nearestSegmentQuery = "" +
     "SELECT" +
     " * FROM roadsegment_noded s " +
     "ORDER BY " +
-    "ST_Distance( s.linestring, ST_Point(:sample_latitude, :sample_longitude)) " +
+    "ST_Distance( s.linestring, ST_Point(:sample_longitude, :sample_latitude)) " +
     "LIMIT 1";
   private static final String candidatesQuery = "" +
     "SELECT " +
-    "   ST_X(candidates.c) as lat, ST_Y(candidates.c) as lon " +
+    "   ST_X(candidates.c) as lon, ST_Y(candidates.c) as lat " +
     "FROM (" +
     "   SELECT " +
-    "       ST_ClosestPoint(s.linestring, ST_Point(:sample_latitude, :sample_longitude)) as c " +
+    "       ST_ClosestPoint(s.linestring, ST_Point(:sample_longitude, :sample_latitude)) as c " +
     "   FROM roadsegment_noded s " +
     "   WHERE s.id in (:near_segments_id)" +
     ") as candidates";
@@ -117,7 +117,7 @@ public class MapMatching extends Controller {
       for(Long id : e.nodes) {
         OverpassResponse.Element pe = r.getElement(id);
         if (pe != null)
-          points.add(new Coordinate(pe.lat, pe.lon));
+          points.add(new Coordinate(pe.lon, pe.lat));
       }
 
     LineString l = fact.createLineString(points.toArray(new Coordinate[points.size()]));
@@ -153,17 +153,17 @@ public class MapMatching extends Controller {
       for(Sample samp:path.samples){
 
           List<NodedRoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, NodedRoadSegment.class)
-                  .setParameter("sample_latitude", samp.latitude)
-                  .setParameter("sample_longitude", samp.longitude)
-                  .setParameter("tolerance", toleranceMeters)
-                  .getResultList();
+              .setParameter("sample_longitude", samp.longitude)
+              .setParameter("sample_latitude", samp.latitude)
+              .setParameter("tolerance", toleranceMeters)
+              .getResultList();
 
           if(result.size() == 0) {
               //nessun segmento candidato seleziono il più vicino
               result = JPA.em().createNativeQuery(nearestSegmentQuery, NodedRoadSegment.class)
-                      .setParameter("sample_latitude", samp.latitude)
-                      .setParameter("sample_longitude", samp.longitude)
-                      .getResultList();
+                  .setParameter("sample_longitude", samp.longitude)
+                  .setParameter("sample_latitude", samp.latitude)
+                  .getResultList();
           }
 
           List<Long> candidateSegmentsIds = new ArrayList<Long>();
@@ -171,8 +171,10 @@ public class MapMatching extends Controller {
               candidateSegmentsIds.add(r.id);
           }
 
-          Query query = JPA.em().createNativeQuery(candidatesQuery).setParameter("sample_latitude", samp.latitude)
-                  .setParameter("sample_longitude", samp.longitude).setParameter("near_segments_id", candidateSegmentsIds);
+          Query query = JPA.em().createNativeQuery(candidatesQuery)
+              .setParameter("sample_longitude", samp.longitude)
+              .setParameter("sample_latitude", samp.latitude)
+              .setParameter("near_segments_id", candidateSegmentsIds);
 
           int i = 0;
           for (Object res : query.getResultList()) {

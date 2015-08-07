@@ -63,7 +63,7 @@ var segments = [
       #{list items:candidatessegments, as:'candidate'}
       [
         #{list items:candidate.getCoordinates(), as:'coordinate'}
-            [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
+            [${coordinate.y}, ${coordinate.x}]${coordinate_isLast ?'':',' }
         #{/list}
       ]${candidate_isLast ?'':',' }
       #{/list}

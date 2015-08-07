@@ -37,6 +37,6 @@ public class Sample extends Model {
   @Transient
   public Point getPoint() {
     GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-      return gf.createPoint(new Coordinate(this.latitude, this.longitude));
+      return gf.createPoint(new Coordinate(this.longitude, this.latitude));
   }
 }

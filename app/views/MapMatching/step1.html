@@ -44,7 +44,7 @@ onload=function(){
     #{list items:segments, as:'segment'}
         polyline = L.polyline([
         #{list items:segment.getCoordinates(), as:'coordinate'}
-	        [${coordinate.x}, ${coordinate.y}]${coordinate_isLast ?'':',' }
+	        [${coordinate.y}, ${coordinate.x}]${coordinate_isLast ?'':',' }
 	    #{/list}
 	    ], {color: '#72FF7A'});
 	    polyline.addTo(map);
