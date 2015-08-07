@@ -75,7 +75,7 @@ var candidates = [
   #{list items:candidates, as:'candidatespoints'}
         [
       #{list items:candidatespoints, as:'point'}
-      [${point.getX()}, ${point.getY()}]${point_isLast ?'':','}
+      [${point.getY()}, ${point.getX()}]${point_isLast ?'':','}
       #{/list}
     ]${candidatespoints_isLast ?'':',' }
   #{/list}

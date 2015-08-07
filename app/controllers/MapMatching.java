@@ -11,7 +11,6 @@ import models.boundaries.OverpassResponse;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.jpa.JPA;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Router;
 import utils.OverpassQuery;
@@ -138,6 +137,14 @@ public class MapMatching extends Controller {
     }
 
     if(newAdded) {
+
+      if(JPA.em().getTransaction().isActive()) {
+        //Force commit transaction
+        JPA.em().flush();
+        JPA.em().getTransaction().commit();
+        JPA.em().getTransaction().begin();
+      }
+
       //Schedule Topology Update
       new UpdateNetworkEdges().now();
     }
@@ -148,14 +155,14 @@ public class MapMatching extends Controller {
   public static List<Sample> addCandidatePoints(Path path) {
       for(Sample samp:path.samples){
 
-          List<NodedRoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, NodedRoadSegment.class)
-              .setParameter("sample_longitude", samp.longitude)
-              .setParameter("sample_latitude", samp.latitude)
-              .setParameter("tolerance", toleranceMeters)
-              .getResultList();
+        List<NodedRoadSegment> result = JPA.em().createNativeQuery(nearSegmentQuery, NodedRoadSegment.class)
+            .setParameter("sample_longitude", samp.longitude)
+            .setParameter("sample_latitude", samp.latitude)
+            .setParameter("tolerance", toleranceMeters)
+            .getResultList();
 
-          if(result.size() == 0) {
-              //nessun segmento candidato seleziono il più vicino
+        if(result.size() == 0) {
+            //nessun segmento candidato seleziono il più vicino
               result = JPA.em().createNativeQuery(nearestSegmentQuery, NodedRoadSegment.class)
                   .setParameter("sample_longitude", samp.longitude)
                   .setParameter("sample_latitude", samp.latitude)
@@ -167,9 +174,9 @@ public class MapMatching extends Controller {
               candidateSegmentsIds.add(r.id);
           }
 
-          Query query = JPA.em().createNativeQuery(candidatesQuery)
-              .setParameter("sample_longitude", samp.longitude)
-              .setParameter("sample_latitude", samp.latitude)
+        Query query = JPA.em().createNativeQuery(candidatesQuery)
+            .setParameter("sample_longitude", samp.longitude)
+            .setParameter("sample_latitude", samp.latitude)
               .setParameter("near_segments_id", candidateSegmentsIds);
 
           int i = 0;
