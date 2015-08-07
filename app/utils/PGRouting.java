@@ -51,20 +51,36 @@ public class PGRouting {
             "WHERE " +
             "   id = :id";
 
-    private static String candidatesLengthQuery = "" +
-        "SELECT " +
-        "  ST_Length(ST_Transform(ST_SetSRID(ST_Line_Substring(c.linestring, " +
-        "    CASE WHEN c.s_pos < c.e_pos THEN c.s_pos ELSE c.e_pos END, " +
-        "    CASE WHEN c.s_pos < c.e_pos THEN c.e_pos ELSE c.s_pos END), 4326),2163)) as par_length " +
-        "FROM ( " +
-        "  SELECT" +
-        "    r.linestring as linestring, " +
-        "    ST_Line_Locate_Point(r.linestring, ST_Point(s.longitude, s.latitude)) as s_pos,  " +
-        "    ST_Line_Locate_Point(r.linestring, ST_Point(e.longitude, e.latitude)) as e_pos " +
-        "FROM (select * from candidatepoint where id = :s_id) as s " +
-        "JOIN (select * from candidatepoint where id = :e_id) as e on 1=1 " +
-        "JOIN roadsegment_noded as r on s.nodedroadsegment_id = r.id " +
-        ") as c;";
+    private static String distanceBySegment = "" +
+      "SELECT " +
+      "  ST_Length(ST_Transform(ST_SetSRID(ST_Line_Substring(" +
+      "    c.linestring, " +
+      "    0.0, " +
+      "    CASE WHEN c.p1_pos < c.p2_pos THEN c.p1_pos ELSE c.p2_pos END), 4326),2163)) as a_len," +
+      "  ST_Length(ST_Transform(ST_SetSRID(ST_Line_Substring(" +
+      "    c.linestring, " +
+      "    CASE WHEN c.p1_pos < c.p2_pos THEN c.p1_pos ELSE c.p2_pos END, " +
+      "    CASE WHEN c.p1_pos < c.p2_pos THEN c.p2_pos ELSE c.p1_pos END), 4326),2163)) as b_len," +
+      "  ST_Length(ST_Transform(ST_SetSRID(ST_Line_Substring(" +
+      "    c.linestring, " +
+      "    CASE WHEN c.p1_pos < c.p2_pos THEN c.p2_pos ELSE c.p1_pos END, " +
+      "    1.0), 4326),2163)) as c_len, " +
+      "  ST_Length(ST_Transform(ST_SetSRID(c.linestring, 4326),2163)) as tot_len, " +
+      "  c.p1_pos as p1, " +
+      "  c.p2_pos as p2 " +
+      "FROM " +
+      "(" +
+      "  SELECT " +
+      "    e.linestring as linestring," +
+      "    ST_Line_Locate_Point(e.linestring, e.p1) as p1_pos," +
+      "    ST_Line_Locate_Point(e.linestring, e.p2) as p2_pos " +
+      "  FROM " +
+      "    ( SELECT " +
+      "        ST_AsBinary(ST_GeomFromText(:linestring)) as linestring," +
+      "        ST_Point(:p1_lon, :p1_lat) as p1," +
+      "        ST_Point(:p2_lon, :p2_lat) as p2 " +
+      "    ) as e " +
+      ") as c;";
 
     public static Double getCandidatesRoutingLength(CandidatePoint startCandidate, CandidatePoint endCandidate) {
       Double distance = 0.0;
@@ -72,9 +88,8 @@ public class PGRouting {
       //    is the portion of linestring between points
 
       if(startCandidate.nodedRoadSegment.equals(endCandidate.nodedRoadSegment)) {
-        Query query = JPA.em().createNativeQuery(candidatesLengthQuery).setParameter("s_id", startCandidate.id).setParameter("e_id", endCandidate.id);
         if(!startCandidate.getPoint().equals(endCandidate.getPoint())) {
-          distance = (Double) query.getSingleResult();
+          distance = distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), endCandidate.getPoint()).get(1);
           Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case I: " + distance + "m");
         }
         return distance;
@@ -188,5 +203,26 @@ public class PGRouting {
       return null;
     }
   }
+
+  public static List<Double> distanceFollowingSegment (LineString linestring, Point p1, Point p2) {
+    Query query = JPA.em().createNativeQuery(distanceBySegment)
+        .setParameter("linestring", linestring.toString())
+        .setParameter("p1_lon", p1.getX())
+        .setParameter("p1_lat", p1.getY())
+        .setParameter("p2_lon", p2.getX())
+        .setParameter("p2_lat", p2.getY());
+
+    Object[] result = (Object[]) query.getSingleResult();
+
+    List<Double> l = new ArrayList<Double>();
+    l.add((Double) result[0]);
+    l.add((Double) result[1]);
+    l.add((Double) result[2]);
+    l.add((Double) result[3]);
+
+    Logger.trace("Split Segment: " + result[0] + " - p1(" + result[4] + ") - " + result[1] + " - p2(" + result[5] + ") - " + result[2] + " = " + result[3]);
+
+    return l;
+    }
 
 }
