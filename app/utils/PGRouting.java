@@ -102,27 +102,25 @@ public class PGRouting {
       Long aTarget = startCandidate.nodedRoadSegment.target;
       Long bSource = endCandidate.nodedRoadSegment.source;
       Long bTarget = endCandidate.nodedRoadSegment.target;
-      Long aVertex, bVertex;
 
       if(aSource == bSource) {
-        aVertex = aSource;
-        bVertex = bSource;
+        distance = distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(0)
+                 + distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(0);
+        Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
+        return distance;
       } else if (aSource == bTarget) {
-        aVertex = aSource;
-        bVertex = bTarget;
+        distance = distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(2)
+                 + distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(0);
+        Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
+        return distance;
       } else if(aTarget == bSource) {
-        aVertex = aTarget;
-        bVertex = bSource;
+        distance = distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(2)
+                 + distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(0);
+        Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
+        return distance;
       } else if(aTarget == bTarget) {
-        aVertex = aTarget;
-        bVertex = bTarget;
-      } else {
-        aVertex = null;
-        bVertex = null;
-      }
-
-      if(aVertex != null && bVertex != null){
-        distance = distance(startCandidate.getPoint(), getVertexPoint(aVertex)) + distance(endCandidate.getPoint(), getVertexPoint(bVertex));
+        distance = distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(2)
+                 + distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(2);
         Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
         return distance;
       }
