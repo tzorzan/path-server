@@ -1,6 +1,6 @@
 package utils;
 
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import models.CandidatePoint;
@@ -11,12 +11,8 @@ import org.opengis.referencing.operation.TransformException;
 import play.Logger;
 import play.cache.Cache;
 import play.db.jpa.JPA;
-
 import javax.persistence.Query;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class PGRouting {
     private static String edgeQuery ="" +
@@ -55,12 +51,34 @@ public class PGRouting {
             "WHERE " +
             "   id = :id";
 
-    public static Double getCandidatesRoutingLength(CandidatePoint startCandidate, CandidatePoint endCandidate) {
-      // I) point A and B are on the same road segment, routing length
-      //    is the euclidean distance between points
+    private static String candidatesLengthQuery = "" +
+        "SELECT " +
+        "  ST_Length(ST_Transform(ST_SetSRID(ST_Line_Substring(c.linestring, " +
+        "    CASE WHEN c.s_pos < c.e_pos THEN c.s_pos ELSE c.e_pos END, " +
+        "    CASE WHEN c.s_pos < c.e_pos THEN c.e_pos ELSE c.s_pos END), 4326),2163)) as par_length " +
+        "FROM ( " +
+        "  SELECT" +
+        "    r.linestring as linestring, " +
+        "    ST_Line_Locate_Point(r.linestring, ST_Point(s.longitude, s.latitude)) as s_pos,  " +
+        "    ST_Line_Locate_Point(r.linestring, ST_Point(e.longitude, e.latitude)) as e_pos " +
+        "FROM (select * from candidatepoint where id = :s_id) as s " +
+        "JOIN (select * from candidatepoint where id = :e_id) as e on 1=1 " +
+        "JOIN roadsegment_noded as r on s.nodedroadsegment_id = r.id " +
+        ") as c;";
 
-      if(startCandidate.nodedRoadSegment.equals(endCandidate.nodedRoadSegment))
-        return distance(startCandidate.getPoint(), endCandidate.getPoint());
+    public static Double getCandidatesRoutingLength(CandidatePoint startCandidate, CandidatePoint endCandidate) {
+      Double distance = 0.0;
+      // I) point A and B are on the same road segment, routing length
+      //    is the portion of linestring between points
+
+      if(startCandidate.nodedRoadSegment.equals(endCandidate.nodedRoadSegment)) {
+        Query query = JPA.em().createNativeQuery(candidatesLengthQuery).setParameter("s_id", startCandidate.id).setParameter("e_id", endCandidate.id);
+        if(!startCandidate.getPoint().equals(endCandidate.getPoint())) {
+          distance = (Double) query.getSingleResult();
+          Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case I: " + distance + "m");
+        }
+        return distance;
+      }
 
       // II) point A and B are on consecutive road segments, routing length
       //     are partials from each segment
@@ -89,7 +107,9 @@ public class PGRouting {
       }
 
       if(aVertex != null && bVertex != null){
-        return distance(startCandidate.getPoint(), getVertexPoint(aVertex)) + distance(endCandidate.getPoint(), getVertexPoint(bVertex));
+        distance = distance(startCandidate.getPoint(), getVertexPoint(aVertex)) + distance(endCandidate.getPoint(), getVertexPoint(bVertex));
+        Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
+        return distance;
       }
 
       // III) point A and B belongs to different non consecutive road segments, we
@@ -101,7 +121,9 @@ public class PGRouting {
       routes.add(distance(startCandidate.getPoint(), getVertexPoint(aTarget)) + getRoutingLength(aTarget, bSource) + distance(getVertexPoint(bSource), endCandidate.getPoint()));
       routes.add(distance(startCandidate.getPoint(), getVertexPoint(aTarget)) + getRoutingLength(aTarget, bTarget) + distance(getVertexPoint(bTarget), endCandidate.getPoint()));
 
-      return Collections.min(routes);
+      distance = Collections.min(routes);
+      Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case III: " + distance + "m");
+      return distance;
     }
 
     public static Double getRoutingLength(Long startVertex, Long endVertex) {
@@ -166,4 +188,5 @@ public class PGRouting {
       return null;
     }
   }
+
 }
