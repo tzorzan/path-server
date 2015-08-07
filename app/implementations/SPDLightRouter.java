@@ -53,12 +53,12 @@ public class SPDLightRouter implements Router  {
   @Override
   public PathRoutes.Feature getRoute(String[] from, String[] to) {
     //Find nearest vertex from start
-    Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(from[0])).setParameter("lat", Double.valueOf(from[1]));
+    Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(from[1])).setParameter("lat", Double.valueOf(from[0]));
     Object[] res = (Object[]) query.getSingleResult();
     Long startId = ((BigInteger) res[0]).longValue();
 
     //Find nearest vertex from end
-    query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(to[0])).setParameter("lat", Double.valueOf(to[1]));
+    query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(to[1])).setParameter("lat", Double.valueOf(to[0]));
     res = (Object[]) query.getSingleResult();
     Long endId = ((BigInteger) res[0]).longValue();
 

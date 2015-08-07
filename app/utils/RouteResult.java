@@ -57,8 +57,8 @@ public class RouteResult {
 
         for(Coordinate c : getNextCoordinates(node, segment.linestring)) {
           Double[] coords = new Double[2];
-          coords[0] = c.y;
-          coords[1] = c.x;
+          coords[0] = c.x;
+          coords[1] = c.y;
           coordinates.add(coords);
         }
 
