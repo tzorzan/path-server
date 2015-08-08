@@ -2,6 +2,7 @@ package controllers;
 
 import implementations.MapQuestRouter;
 import implementations.SPDLightRouter;
+import implementations.SPDNoiseRouter;
 import implementations.SPDRouter;
 import models.boundaries.PathRoutes;
 import org.geojson.Feature;
@@ -70,9 +71,10 @@ public class Api extends Controller {
 
         F.Promise<PathRoutes.Feature> spdRouteJobResult = new RouteJob(new SPDRouter(), from, to).now();
         F.Promise<PathRoutes.Feature> spdLightRouteJobResult = new RouteJob(new SPDLightRouter(), from, to).now();
+        F.Promise<PathRoutes.Feature> spdNoiseRouteJobResult = new RouteJob(new SPDNoiseRouter(), from, to).now();
         F.Promise<PathRoutes.Feature> mapQuestRouteJobResult = new RouteJob(new MapQuestRouter(), from, to).now();
 
-        F.Promise<List<PathRoutes.Feature>> jobList = F.Promise.waitAll(spdRouteJobResult, spdLightRouteJobResult, mapQuestRouteJobResult);
+        F.Promise<List<PathRoutes.Feature>> jobList = F.Promise.waitAll(spdRouteJobResult, spdLightRouteJobResult, spdNoiseRouteJobResult, mapQuestRouteJobResult);
         List<PathRoutes.Feature> resultList = await(jobList);
 
         routes.features = resultList.toArray(new PathRoutes.Feature[resultList.size()]);

@@ -1,18 +1,19 @@
 package implementations;
 
 import java.math.BigInteger;
+
 import javax.persistence.Query;
+
 import models.boundaries.PathRoutes;
 import play.Logger;
 import play.db.jpa.JPA;
-import interfaces.Router;
-import play.mvc.Http;
 import utils.RouteResult;
+import interfaces.Router;
 
 /**
  * Router implementation using Dijkstra Shortest Path algorithm.
  */
-public class SPDLightRouter implements Router  {
+public class SPDNoiseRouter implements Router  {
   private static String nearestPointQuery = "" +
       "SELECT" +
       "  id," +
@@ -23,8 +24,7 @@ public class SPDLightRouter implements Router  {
       "  distance ASC " +
       "LIMIT 1";
 
-  private static Double lightRatio = 0.25;
-
+  private static Double noiseRatio = 0.25;
   private static String routingQuery ="" +
       "SELECT " +
       "   seq, " +
@@ -39,10 +39,10 @@ public class SPDLightRouter implements Router  {
       "  r.target::integer," +
       "  m_len(linestring) as length_cost, " +
       "  avg(COALESCE(l.value, 0)) as label_value, " +
-      "  m_len(linestring) + (" + lightRatio + "  * m_len(linestring) * ((avg(COALESCE(l.value, 0)))/100)) as cost " +
+      "  m_len(linestring) + (" + noiseRatio + " * m_len(linestring) * ((avg(COALESCE(l.value, 0))))) as cost " +
       "FROM " +
       "  roadsegment_noded as r " +
-      "LEFT OUTER JOIN light_sample as l ON r.id = l.roadsegment_id AND l.time_class = time_class(localtimestamp) " +
+      "LEFT OUTER JOIN noise_sample as l ON r.id = l.roadsegment_id AND l.time_class = time_class(localtimestamp) " +
       "GROUP BY " +
       "  r.id," +
       "  r.source::integer," +
@@ -76,7 +76,7 @@ public class SPDLightRouter implements Router  {
     f.geometry.coordinates = r.coordinates;
 
     f.properties = new PathRoutes.Properties();
-    f.properties.comment = "Less Light - generato con PGRouting";
+    f.properties.comment = "Less Noise - generato con PGRouting";
     f.properties.distance = r.length;
     f.properties.maneuvers = r.maneuvers.toArray(new PathRoutes.Maneuver[r.maneuvers.size()]);
     f.properties.maneuverIndexes = r.maneuverIndexes.toArray(new Integer[r.maneuverIndexes.size()]);
