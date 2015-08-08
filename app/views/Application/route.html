@@ -60,6 +60,15 @@ var redIcon = L.icon({
 		            iconAnchor: [12, 41]
                 });
 
+%{
+  for (feature in routes.features) {
+}%
+    L.marker([${feature.geometry.coordinates.get(0)[1]},${feature.geometry.coordinates.get(0)[0]}], {icon: greenIcon}).addTo(map);
+    L.marker([${feature.geometry.coordinates.get(feature.geometry.coordinates.size-1)[1]},${feature.geometry.coordinates.get(feature.geometry.coordinates.size-1)[0]}], {icon: redIcon}).addTo(map);
+%{
+  }
+}%
+
 map.fitBounds(feature.getBounds(), {padding: [20, 20]});
 
 map.on('click', function(e) {
