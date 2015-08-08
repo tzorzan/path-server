@@ -23,14 +23,6 @@ public class PGRouting {
             "   ST_Length(ST_Transform(ST_SetSRID(linestring, 4326),2163)) as cost " +
             "FROM " +
             "   roadsegment_noded";
-    private static String labelCostQuery ="" +
-            "SELECT " +
-            "   id," +
-            "   source::integer, " +
-            "   target::integer, " +
-            "   COST_WITH_LABEL " +
-            "FROM " +
-            "   roadsegment_noded";
     private static String routingQuery ="" +
             "SELECT " +
             "   seq, " +
@@ -103,38 +95,42 @@ public class PGRouting {
       Long bSource = endCandidate.nodedRoadSegment.source;
       Long bTarget = endCandidate.nodedRoadSegment.target;
 
+      List<Double> asplitted = distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint());
+      List<Double> bsplitted = distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint());
+      Double as = asplitted.get(0);
+      Double at = asplitted.get(1);
+      Double bs = bsplitted.get(0);
+      Double bt = asplitted.get(1);
+
       if(aSource == bSource) {
-        distance = distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(0)
-                 + distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(0);
+        distance = bs + as;
         Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
         return distance;
       } else if (aSource == bTarget) {
-        distance = distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(2)
-                 + distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(0);
+        distance = bt + as;
         Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
         return distance;
       } else if(aTarget == bSource) {
-        distance = distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(2)
-                 + distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(0);
+        distance = at + bs;
         Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
         return distance;
       } else if(aTarget == bTarget) {
-        distance = distanceFollowingSegment(startCandidate.nodedRoadSegment.linestring, startCandidate.getPoint(), startCandidate.getPoint()).get(2)
-                 + distanceFollowingSegment(endCandidate.nodedRoadSegment.linestring, endCandidate.getPoint(), endCandidate.getPoint()).get(2);
+        distance = at + bt;
         Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case II: " + distance + "m");
         return distance;
       }
 
       // III) point A and B belongs to different non consecutive road segments, we
       //      need to compute the shortest path between the tho segments
-      // TODO: implementation
+
       Set<Double> routes  = new HashSet<Double>();
-      routes.add(distance(startCandidate.getPoint(), getVertexPoint(aSource)) + getRoutingLength(aSource, bSource) + distance(getVertexPoint(bSource), endCandidate.getPoint()));
-      routes.add(distance(startCandidate.getPoint(), getVertexPoint(aSource)) + getRoutingLength(aSource, bTarget) + distance(getVertexPoint(bTarget), endCandidate.getPoint()));
-      routes.add(distance(startCandidate.getPoint(), getVertexPoint(aTarget)) + getRoutingLength(aTarget, bSource) + distance(getVertexPoint(bSource), endCandidate.getPoint()));
-      routes.add(distance(startCandidate.getPoint(), getVertexPoint(aTarget)) + getRoutingLength(aTarget, bTarget) + distance(getVertexPoint(bTarget), endCandidate.getPoint()));
+      routes.add(as + getRoutingLength(aSource, bSource) + bs);
+      routes.add(as + getRoutingLength(aSource, bTarget) + bt);
+      routes.add(at + getRoutingLength(aTarget, bSource) + bs);
+      routes.add(at + getRoutingLength(aTarget, bTarget) + bt);
 
       distance = Collections.min(routes);
+
       Logger.trace("Distance " + startCandidate + " - " + endCandidate + " - case III: " + distance + "m");
       return distance;
     }
@@ -161,16 +157,6 @@ public class PGRouting {
             Logger.trace("Router " + startVertex + " - " + endVertex + " => " + cost + " (cached)");
             return cacheCost;
         }
-    }
-
-    public static Long getNearestVertex(Point point, NodedRoadSegment edge) {
-        Point source = getVertexPoint(edge.source);
-        Point target = getVertexPoint(edge.target);
-
-        if(distance(point, source) < distance(point, target))
-            return edge.source;
-        else
-            return edge.target;
     }
 
     public static Point getVertexPoint(Long id) {
@@ -200,6 +186,12 @@ public class PGRouting {
       e.printStackTrace();
       return null;
     }
+  }
+
+  public static List<Double> distanceFollowingSegment (LineString linestring, Point p) {
+    List<Double> l = distanceFollowingSegment(linestring, p, p);
+    l.remove(1);
+    return l;
   }
 
   public static List<Double> distanceFollowingSegment (LineString linestring, Point p1, Point p2) {
