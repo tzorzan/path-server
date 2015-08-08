@@ -8,8 +8,11 @@ import com.vividsolutions.jts.geom.Point;
 import models.NodedRoadSegment;
 import models.RoadSegment;
 import models.boundaries.PathRoutes;
+import play.db.jpa.JPA;
 import play.mvc.Http;
 
+import javax.persistence.Query;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,10 +54,6 @@ public class RouteResult {
       NodedRoadSegment segment = NodedRoadSegment.findById(Long.valueOf((Integer) resArray[2]));
 
       if(segment != null) {
-        //inizializzo lastSegment e lastNode se sono alla prima iterazione
-        lastRoadSegment = lastRoadSegment==null?segment.roadSegment:lastRoadSegment;
-        lastNode = lastNode==null?node:lastNode;
-
         for(Coordinate c : getNextCoordinates(node, segment.linestring)) {
           Double[] coords = new Double[2];
           coords[0] = c.x;
@@ -63,8 +62,23 @@ public class RouteResult {
         }
 
         length += (Double) resArray[3];
-        // se il segmento è cambiato allora aggiungo le informazioni per la svolta
-        if(lastRoadSegment.id != segment.roadSegment.id) {
+        if(lastRoadSegment==null) {
+          //inizializzo lastSegment e lastNode se sono alla prima iterazione
+          lastRoadSegment=segment.roadSegment;
+          lastNode=node;
+
+          //aggiungo le informazioni di partenza
+          PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
+          route_maneuver.iconUrl = "/public/images/start.gif";
+          String vs = segment.roadSegment.name!=null?" da " + segment.roadSegment.name : "";
+          route_maneuver.narrative = "Parti" + vs;
+          route_maneuver.streets = new String[1];
+          route_maneuver.streets[0] = segment.roadSegment.name;
+          maneuvers.add(route_maneuver);
+          maneuverIndexes.add(counter);
+
+        } else if(lastRoadSegment.id != segment.roadSegment.id) {
+          // se il segmento è cambiato allora aggiungo le informazioni per la svolta
           PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
           String via = segment.roadSegment.name!=null?segment.roadSegment.name:"";
           Integer turnDirection = getTurnDirection(segment.linestring, lastNode);
@@ -88,7 +102,40 @@ public class RouteResult {
         lastNode = node;
       }
     }
+
+    PathRoutes.Maneuver route_maneuver = new PathRoutes.Maneuver();
+    route_maneuver.iconUrl = "/public/images/end.gif";
+    route_maneuver.narrative = "Sei arrivato a destinazione";
+    route_maneuver.streets = new String[1];
+    route_maneuver.streets[0] = lastRoadSegment.name;
+    maneuvers.add(route_maneuver);
+    maneuverIndexes.add(counter);
+
     return new RouteResult(coordinates, length, maneuvers, maneuverIndexes);
+  }
+
+  private static String nearestVertexQuery = "" +
+      "SELECT" +
+      "  v.id as v_id," +
+      "  r.id as r_id," +
+      "  r.old_id as r_old_id," +
+      "  r.source," +
+      "  r.target," +
+      "  ST_Distance(r.linestring, ST_Point(:lon, :lat)) as r_distance," +
+      "  ST_Distance(v.the_geom, ST_Point(:lon, :lat)) as v_distance " +
+      "FROM" +
+      "  roadsegment_noded_vertices_pgr as v " +
+      "JOIN" +
+      "  roadsegment_noded as r ON r.source = v.id OR r.target = v.id " +
+      "ORDER BY" +
+      "  r_distance, v_distance ASC " +
+      "LIMIT 1;";
+
+  public static Long getNearestVertex(Point point){
+    //Find nearest vertex from end
+    Query query = JPA.em().createNativeQuery(nearestVertexQuery).setParameter("lon", point.getX()).setParameter("lat", point.getY());
+    Object[] res = (Object[]) query.getSingleResult();
+    return ((BigInteger) res[0]).longValue();
   }
 
   private static List<Coordinate> getNextCoordinates(Point node, LineString linestring) {
@@ -104,7 +151,7 @@ public class RouteResult {
 
   private static int getTurnDirection(LineString segment, Point node) {
     List<Coordinate> l = Arrays.asList(segment.getCoordinates());
-    // confronto l'ultimo nodo con il prossimo segmento, devo invertire il risultato
-    return CGAlgorithms.computeOrientation(l.get(l.size()-2), l.get(l.size()-1),node.getCoordinate())*-1;
+    // confronto l'ultimo nodo con il prossimo segmento
+    return CGAlgorithms.computeOrientation(l.get(l.size()-2), l.get(l.size()-1),node.getCoordinate());
   }
 }

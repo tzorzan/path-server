@@ -1,9 +1,9 @@
 package implementations;
 
-import java.math.BigInteger;
-
 import javax.persistence.Query;
-
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import models.boundaries.PathRoutes;
 import play.Logger;
 import play.db.jpa.JPA;
@@ -14,16 +14,6 @@ import interfaces.Router;
  * Router implementation using Dijkstra Shortest Path algorithm.
  */
 public class SPDNoiseRouter implements Router  {
-  private static String nearestPointQuery = "" +
-      "SELECT" +
-      "  id," +
-      "  ST_Distance(the_geom, ST_Point(:lon, :lat)) as distance " +
-      "FROM" +
-      "  roadsegment_noded_vertices_pgr " +
-      "ORDER BY" +
-      "  distance ASC " +
-      "LIMIT 1";
-
   private static Double noiseRatio = 0.25;
   private static String routingQuery ="" +
       "SELECT " +
@@ -54,19 +44,17 @@ public class SPDNoiseRouter implements Router  {
 
   @Override
   public PathRoutes.Feature getRoute(String[] from, String[] to) {
+    GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+
     //Find nearest vertex from start
-    Query query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(from[1])).setParameter("lat", Double.valueOf(from[0]));
-    Object[] res = (Object[]) query.getSingleResult();
-    Long startId = ((BigInteger) res[0]).longValue();
+    Long startId = RouteResult.getNearestVertex(gf.createPoint(new Coordinate(Double.valueOf(from[1]), Double.valueOf(from[0]))));
 
     //Find nearest vertex from end
-    query = JPA.em().createNativeQuery(nearestPointQuery).setParameter("lon", Double.valueOf(to[1])).setParameter("lat", Double.valueOf(to[0]));
-    res = (Object[]) query.getSingleResult();
-    Long endId = ((BigInteger) res[0]).longValue();
+    Long endId = RouteResult.getNearestVertex(gf.createPoint(new Coordinate(Double.valueOf(to[1]), Double.valueOf(to[0]))));
 
     //Calculate routing path using PGRouting
     Logger.info("Start: " + startId + "  End: " + endId);
-    query = JPA.em().createNativeQuery(routingQuery).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
+    Query query = JPA.em().createNativeQuery(routingQuery).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
 
     RouteResult r = RouteResult.getRouteResultFromQueryResult(query.getResultList());
     PathRoutes.Feature f = new PathRoutes.Feature();
