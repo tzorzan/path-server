@@ -15,7 +15,8 @@
     <body>
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="navbar-header">
-                <a class="navbar-brand" href="@{Application.index}">PathS</a>
+                <a class="navbar-brand" href="@{Application.index}">
+                    <span><img src="/public/images/profile.png" alt="PathS" width="20" height="20"></span>PathS</a>
             </div>
             <ul class="nav navbar-nav">
                 <li class="#{checknav request}@{MapMatching.list}#{/checknav}"><a href="@{MapMatching.list}">Samples List</a></li>
@@ -30,14 +31,13 @@
                 <li class="#{checknav request}@{Application.route}#{/checknav}"><a href="@{Application.route}?from=45.4107960,11.8881404&to=45.4097416,11.8913376">Route</a></li>
             </ul>
         </nav>
-        <div class="container-fluid"  style="height: 100%;">
-            <div class="row">
-                <div class="col-md-12">
-                    <h1>#{get 'title' /} <small>#{get 'subtitle' /}</small></h1>
-                </div>
+
+        <div class="container-fluid" style="height: 100%;">
+            <div class="row" style="height: 100%;">
+                #{doLayout /}
             </div>
-            #{doLayout /}
         </div>
+
         <script src="@{'/public/javascripts/jquery-1.11.3.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
         <script src="@{'/public/bootstrap/js/bootstrap.min.js'}"></script>
     </body>

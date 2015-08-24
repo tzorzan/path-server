@@ -1,32 +1,28 @@
 #{extends 'leaflet.html' /}
-#{set title:'MapMatching' /}
-#{set subtitle:'Step 3' /}
 
-<div class="row">
-    <div class="col-md-12">
-        Valutazione e assegnazione punteggi ai candidati.
-        <div class="well">
-            <h6>Usa i tasti <strong>&larr;</strong> o <strong>&rarr;</strong> per cambiare punto.</h6>
-            <ul class="list-inline">
-                <li><a href="#" onclick="leftArrowPressed();"><<</a></li>
-                %{
-                n = 0;
-                for(sample in path.samples) {
-                }%
-                <li><a href="#" onclick="showCandidates(${n});">${n}</a></li>
-                %{
-                n++;
-                }
-                }%
-                <li><a href="#" onclick="rightArrowPressed();">>></a></li>
-            </ul>
-        </div>
-    </div>
+<div class="col-md-8" style="height: 100%; padding-left: 0px;">
+    <div id="map"></div>
 </div>
+<div class="col-md-4">
+    <h1>MapMatching <small>Step 3</small></h1>
 
-<div class="row" style="height: 100%;">
-    <div class="col-md-12" style="height: 100%;">
-        <div id="map"></div>
+    Valutazione e assegnazione punteggi ai candidati.
+
+    <div class="well">
+        <h6>Usa i tasti <strong>&larr;</strong> o <strong>&rarr;</strong> per cambiare punto.</h6>
+        <ul class="list-inline">
+            <li><a href="#" onclick="leftArrowPressed();"><<</a></li>
+            %{
+            n = 0;
+            for(sample in path.samples) {
+            }%
+            <li><a href="#" onclick="showCandidates(${n});">${n}</a></li>
+            %{
+            n++;
+            }
+            }%
+            <li><a href="#" onclick="rightArrowPressed();">>></a></li>
+        </ul>
     </div>
 </div>
 

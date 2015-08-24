@@ -1,25 +1,22 @@
 #{extends 'leaflet.html' /}
-#{set title:'MapMatching' /}
-#{set subtitle:'Step 1' /}
 
-<div class="well" style="width: 200px; position: fixed; right: 15px; top: 60px;">Go to <a href="@{MapMatching.step2}/${params.parameter}">Step 2 >></a></div>
-
-<div class="row">
-	<div class="col-md-12" style="margin-bottom:15px;">
-		Punti del campionamento e relativo bounding box allargata.
-		Tutti i segmenti inclusi nella bounding box sono inseriti a sistema.
-	</div>
+<div class="col-md-8" style="height: 100%; padding-left: 0px;">
+	<div id="map"></div>
 </div>
-<div class="row" style="height: 100%;">
-	<div class="col-md-12" style="height: 100%;">
-		<div id="map"></div>
-	</div>
+<div class="col-md-4">
+	<h1>MapMatching <small>Step 1</small></h1>
+
+	<div class="well" style="width: 200px; position: fixed; right: 15px; bottom: -5px;">Go to <a href="@{MapMatching.step2}/${params.parameter}">Step 2 >></a></div>
+
+	Punti del campionamento e relativo bounding box allargata.
+	Tutti i segmenti inclusi nella bounding box sono inseriti a sistema.
 </div>
 
 <script>
 onload=function(){
 	var map = L.map('map',{
-    						maxZoom: 20
+    						zoom: 18,
+   							maxZoom: 20
 						});
 	L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
 

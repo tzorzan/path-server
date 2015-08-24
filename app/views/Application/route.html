@@ -1,38 +1,36 @@
 #{stylesheet src:'pointer.css' /}
 #{extends 'leaflet.html' /}
-#{set title:'Route' /}
-#{set subtitle: 'Click on the map to change start or destination.' /}
 
-<div class="row" style="height: 100%;">
-    <div class="col-md-8" style="height: 100%;">
-        <div id="map"></div>
+<div class="col-md-8" style="height: 100%; padding-left: 0px;">
+    <div class="col-md-8" id="map" style="position: fixed;"></div>
+</div>
+<div class="col-md-4">
+    <h1>Route <small>Click on the map to change start or destination.</small></h1>
+
+    <div class="well">
+        <img src="/public/images/marker-icon-green.png" style="width: 25px; height: 41px;"> [ ${params.from} ]
+        <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px;"> [ ${params.to} ]
     </div>
-    <div class="col-md-4">
-        <div class="well">
-            <img src="/public/images/marker-icon-green.png" style="width: 25px; height: 41px;"> [ ${params.from} ]
-            <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px;"> [ ${params.to} ]
-        </div>
 
-        %{
-          for (feature in routes.features) {
-        }%
-        <div>
-            ${feature.properties.comment} (${feature.properties.distance.format('##')}m)
-            <ul>
-                %{
-                for (maneuver in feature.properties.maneuvers) {
-                }%
-                <li><img src="${maneuver.iconUrl}"/> ${maneuver.narrative}</li>
-                %{
-                }
-                }%
-            </ul>
-        </div>
-        %{
-          }
-        }%
-
+    %{
+    for (feature in routes.features) {
+    }%
+    <div>
+        ${feature.properties.comment} (${feature.properties.distance.format('##')}m)
+        <ul>
+            %{
+            for (maneuver in feature.properties.maneuvers) {
+            }%
+            <li><img src="${maneuver.iconUrl}"/> ${maneuver.narrative}</li>
+            %{
+            }
+            }%
+        </ul>
     </div>
+    %{
+    }
+    }%
+
 </div>
 
 <script>
