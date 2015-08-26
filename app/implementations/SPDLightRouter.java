@@ -65,6 +65,7 @@ public class SPDLightRouter implements Router  {
 
     f.properties = new PathRoutes.Properties();
     f.properties.comment = "Less Light - generato con PGRouting";
+    f.properties.color = "grey";
     f.properties.distance = r.length;
     f.properties.maneuvers = r.maneuvers.toArray(new PathRoutes.Maneuver[r.maneuvers.size()]);
     f.properties.maneuverIndexes = r.maneuverIndexes.toArray(new Integer[r.maneuverIndexes.size()]);

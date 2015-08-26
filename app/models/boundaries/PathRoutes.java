@@ -23,6 +23,7 @@ public class PathRoutes {
 
     public static class Properties {
         public String comment;
+        public String color;
         public Double distance;
         public Maneuver[] maneuvers;
         public Integer[] maneuverIndexes;

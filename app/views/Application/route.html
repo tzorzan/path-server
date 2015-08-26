@@ -12,11 +12,16 @@
         <img src="/public/images/marker-icon-red.png" style="width: 25px; height: 41px;"> [ ${params.to} ]
     </div>
 
+
+
     %{
+    int i = 0;
     for (feature in routes.features) {
     }%
     <div>
-        ${feature.properties.comment} (${feature.properties.distance.format('##')}m)
+        <input type="checkbox" name="route-${i}" data-size="mini" checked>
+        <button type="button" class="btn btn-xs disable" style="background-color: ${feature.properties.color}; opacity: 0.5; width: 24px;"> &nbsp;</button>
+        <strong>${feature.properties.comment}</strong> (${feature.properties.distance.format('##')}m)
         <ul>
             %{
             for (maneuver in feature.properties.maneuvers) {
@@ -28,6 +33,7 @@
         </ul>
     </div>
     %{
+    i++;
     }
     }%
 
@@ -42,7 +48,22 @@ var map = L.map('map',{
 
 L.tileLayer('http://{s}.tiles.mapbox.com/v3/tzorzan.ik1cmo25/{z}/{x}/{y}.png').addTo(map);
 
-var feature = L.geoJson(geoJson).addTo(map);
+var layers = {};
+var features = {};
+
+var feature = L.geoJson(geoJson, {
+    style: function (feature) {
+        return {color: feature.properties.color};
+    },
+    onEachFeature: function (feature, layer) {
+        layers[feature.properties.comment] = layer;
+        layer.name = "route-"+geoJson.features.indexOf(feature);
+
+        features["route-"+geoJson.features.indexOf(feature)] = layer;
+    }
+    }).addTo(map);
+
+L.control.layers(null, layers).addTo(map);
 
 var greenIcon = L.icon({
                     iconUrl: '/public/images/marker-icon-green.png',
@@ -86,4 +107,30 @@ map.on('click', function(e) {
 
     var popup = L.popup().setLatLng(e.latlng).setContent(content).openOn(map);
 });
+
+map.on('overlayadd', function(e) {
+    $("[name='"+e.layer.name+"']").bootstrapSwitch('state', true, true);
+});
+
+map.on('overlayremove', function(e) {
+    $("[name='"+e.layer.name+"']").bootstrapSwitch('state', false, false);
+});
+
+for(i=0; i<${i};i++) {
+    $("[name='route-"+i+"']").bootstrapSwitch({
+        onSwitchChange: function(event, state) {
+              var thisroute = this.name;
+              if(state) {
+                map.addLayer(features[thisroute]);
+              } else {
+                map.eachLayer(function (layer) {
+                    if(layer.name == thisroute) {
+                        map.removeLayer(layer);
+                    }
+                });
+              }
+        }
+    });
+}
+
 </script>

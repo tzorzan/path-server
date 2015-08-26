@@ -7,9 +7,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0,  maximum-scale=1.0, user-scalable=no">
         <title>#{get 'title' /}</title>
         <link href="@{'/public/bootstrap/css/bootstrap.min.css'}" rel="stylesheet">
+        <link href="@{'/public/bootstrap/css/bootstrap-switch.min.css'}" rel="stylesheet">
         <link href="@{'/public/stylesheets/main.css'}" media="screen" rel="stylesheet" >
         #{get 'moreStyles' /}
         <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <script src="@{'/public/javascripts/jquery-1.11.3.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+        <script src="@{'/public/bootstrap/js/bootstrap.min.js'}"></script>
+        <script src="@{'/public/bootstrap/js/bootstrap-switch.min.js'}"></script>
         #{get 'moreScripts' /}
     </head>
     <body>
@@ -38,7 +42,5 @@
             </div>
         </div>
 
-        <script src="@{'/public/javascripts/jquery-1.11.3.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
-        <script src="@{'/public/bootstrap/js/bootstrap.min.js'}"></script>
     </body>
 </html>

@@ -69,6 +69,7 @@ public class MapQuestQuery {
         }
         routes.features[0].properties = new PathRoutes.Properties();
         routes.features[0].properties.comment = "Generato con servizio MapQuest.";
+        routes.features[0].properties.color = "blue";
         routes.features[0].properties.distance = routeResponse.route.distance * 1000;
 
         List<PathRoutes.Maneuver> maneuvers = new ArrayList<PathRoutes.Maneuver>();

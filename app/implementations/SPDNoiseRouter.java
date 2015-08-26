@@ -65,6 +65,7 @@ public class SPDNoiseRouter implements Router  {
 
     f.properties = new PathRoutes.Properties();
     f.properties.comment = "Less Noise - generato con PGRouting";
+    f.properties.color = "green";
     f.properties.distance = r.length;
     f.properties.maneuvers = r.maneuvers.toArray(new PathRoutes.Maneuver[r.maneuvers.size()]);
     f.properties.maneuverIndexes = r.maneuverIndexes.toArray(new Integer[r.maneuverIndexes.size()]);

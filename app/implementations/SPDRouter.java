@@ -54,6 +54,7 @@ public class SPDRouter implements Router {
 
     f.properties = new PathRoutes.Properties();
     f.properties.comment = "Shortest Path - generato con PGRouting";
+    f.properties.color = "red";
     f.properties.distance = r.length;
     f.properties.maneuvers = r.maneuvers.toArray(new PathRoutes.Maneuver[r.maneuvers.size()]);
     f.properties.maneuverIndexes = r.maneuverIndexes.toArray(new Integer[r.maneuverIndexes.size()]);
