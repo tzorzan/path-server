@@ -5,18 +5,20 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import implementations.MapQuestRouter;
+import implementations.SPDLightRouter;
+import implementations.SPDNoiseRouter;
+import implementations.SPDRouter;
 import models.NodedRoadSegment;
 import models.RoadSegment;
 import models.boundaries.PathRoutes;
 import play.db.jpa.JPA;
+import play.libs.F;
 import play.mvc.Http;
 
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Route result container class
@@ -136,6 +138,15 @@ public class RouteResult {
     Query query = JPA.em().createNativeQuery(nearestVertexQuery).setParameter("lon", point.getX()).setParameter("lat", point.getY());
     Object[] res = (Object[]) query.getSingleResult();
     return ((BigInteger) res[0]).longValue();
+  }
+
+  public static F.Promise<List<PathRoutes.Feature>> getAllRoutes(String[] from, String[] to, Map<String, Object> params) {
+    F.Promise<PathRoutes.Feature> spdRouteJobResult = new RouteJob(new SPDRouter(), from, to, params).now();
+    F.Promise<PathRoutes.Feature> spdLightRouteJobResult = new RouteJob(new SPDLightRouter(), from, to, params).now();
+    F.Promise<PathRoutes.Feature> spdNoiseRouteJobResult = new RouteJob(new SPDNoiseRouter(), from, to, params).now();
+    F.Promise<PathRoutes.Feature> mapQuestRouteJobResult = new RouteJob(new MapQuestRouter(), from, to, params).now();
+
+    return F.Promise.waitAll(spdRouteJobResult, spdLightRouteJobResult, spdNoiseRouteJobResult, mapQuestRouteJobResult);
   }
 
   private static List<Coordinate> getNextCoordinates(Point node, LineString linestring) {

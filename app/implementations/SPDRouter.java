@@ -7,6 +7,7 @@ import play.Logger;
 import play.db.jpa.JPA;
 import utils.RouteResult;
 import javax.persistence.Query;
+import java.util.Map;
 
 /**
  * Router implementation using Dijkstra Shortest Path algorithm.
@@ -32,7 +33,7 @@ public class SPDRouter implements Router {
       "false);";
 
   @Override
-  public PathRoutes.Feature getRoute(String[] from, String[] to) {
+  public PathRoutes.Feature getRoute(String[] from, String[] to, Map<String, Object> params) {
     GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
     //Find nearest vertex from start

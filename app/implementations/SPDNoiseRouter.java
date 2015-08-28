@@ -10,11 +10,13 @@ import play.db.jpa.JPA;
 import utils.RouteResult;
 import interfaces.Router;
 
+import java.util.Map;
+
 /**
  * Router implementation using Dijkstra Shortest Path algorithm.
  */
 public class SPDNoiseRouter implements Router  {
-  private static Double noiseRatio = 0.25;
+  private static Double defaultRatio = 0.25;
   private static String routingQuery ="" +
       "SELECT " +
       "   seq, " +
@@ -29,7 +31,7 @@ public class SPDNoiseRouter implements Router  {
       "  r.target::integer," +
       "  m_len(linestring) as length_cost, " +
       "  avg(COALESCE(l.value, 0)) as label_value, " +
-      "  m_len(linestring) + (" + noiseRatio + " * m_len(linestring) * ((avg(COALESCE(l.value, 0))))) as cost " +
+      "  m_len(linestring) + ( :ratio * m_len(linestring) * ((avg(COALESCE(l.value, 0))))) as cost " +
       "FROM " +
       "  roadsegment_noded as r " +
       "LEFT OUTER JOIN noise_sample as l ON r.id = l.roadsegment_id AND l.time_class = time_class(localtimestamp) " +
@@ -43,7 +45,7 @@ public class SPDNoiseRouter implements Router  {
       "false);";
 
   @Override
-  public PathRoutes.Feature getRoute(String[] from, String[] to) {
+  public PathRoutes.Feature getRoute(String[] from, String[] to, Map<String, Object> params) {
     GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
     //Find nearest vertex from start
@@ -52,9 +54,13 @@ public class SPDNoiseRouter implements Router  {
     //Find nearest vertex from end
     Long endId = RouteResult.getNearestVertex(gf.createPoint(new Coordinate(Double.valueOf(to[1]), Double.valueOf(to[0]))));
 
+    //Check ratio param
+    Double ratio = params.keySet().contains("ratio")?((Double) params.get("noiseRatio")): defaultRatio;
+
     //Calculate routing path using PGRouting
-    Logger.info("Start: " + startId + "  End: " + endId);
-    Query query = JPA.em().createNativeQuery(routingQuery).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
+    Logger.debug("Start: " + startId + "  End: " + endId + " Ratio: " + ratio);
+    //NOTE: Forced to use String replace because :namedParameter doesn't work in text(...)
+    Query query = JPA.em().createNativeQuery(routingQuery.replace(":ratio", ratio.toString())).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
 
     RouteResult r = RouteResult.getRouteResultFromQueryResult(query.getResultList());
     PathRoutes.Feature f = new PathRoutes.Feature();
