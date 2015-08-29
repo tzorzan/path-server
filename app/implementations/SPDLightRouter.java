@@ -16,7 +16,7 @@ import java.util.Map;
  * Router implementation using Dijkstra Shortest Path algorithm.
  */
 public class SPDLightRouter implements Router  {
-  private static Double defaultRatio = 0.25;
+  public static Double defaultRatio = 0.25;
   private static String routingQuery ="" +
       "SELECT " +
       "   seq, " +
@@ -58,7 +58,7 @@ public class SPDLightRouter implements Router  {
     Double ratio = params.keySet().contains("ratio")?((Double) params.get("lightRatio")): defaultRatio;
 
     //Calculate routing path using PGRouting
-    Logger.debug("Start: " + startId + "  End: " + endId + " Ratio: " + ratio);
+    Logger.debug(this.getClass() + ": Start:" + startId + " End: " + endId + " Ratio: " + ratio);
     //NOTE: Forced to use String replace because :namedParameter doesn't work in text(...)
     Query query = JPA.em().createNativeQuery(routingQuery.replace(":ratio", ratio.toString())).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
 

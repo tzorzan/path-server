@@ -43,7 +43,7 @@ public class SPDRouter implements Router {
     Long endId = RouteResult.getNearestVertex(gf.createPoint(new Coordinate(Double.valueOf(to[1]), Double.valueOf(to[0]))));
 
     //Calculate routing path using PGRouting
-    Logger.info("Start: " + startId + "  End: " + endId);
+    Logger.debug(this.getClass() + ": Start: " + startId + "  End: " + endId);
     Query query = JPA.em().createNativeQuery(routingQuery).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
 
     RouteResult r = RouteResult.getRouteResultFromQueryResult(query.getResultList());
