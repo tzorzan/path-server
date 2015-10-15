@@ -23,6 +23,7 @@ public class Application extends Controller {
         Map<String, Object> p = new HashMap<String, Object>();
         p.putAll(processParam("lightRatio"));
         p.putAll(processParam("noiseRatio"));
+        p.putAll(processParam("threshold"));
 
         List<PathRoutes.Feature> resultList = await(RouteResult.getAllRoutes(from, to, p));
 
@@ -41,7 +42,19 @@ public class Application extends Controller {
         if(params._contains(param)) {
             map.put(param, params.get(param));
         } else {
-            params.put(param, String.valueOf(SPDLightRouter.defaultRatio));
+            String s = "";
+            switch (param) {
+                case "lightRatio":
+                    s = String.valueOf(SPDLightRouter.defaultRatio);
+                    break;
+                case "noiseRatio":
+                    s = String.valueOf(SPDLightRouter.defaultRatio);
+                    break;
+                case "threshold":
+                    s = String.valueOf(SPDLightRouter.defaultThreshold);
+                    break;
+            }
+            params.put(param, s);
         }
         return map;
     }

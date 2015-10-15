@@ -17,6 +17,7 @@ import java.util.Map;
  */
 public class SPDLightRouter implements Router  {
   public static Double defaultRatio = 0.25;
+  public static Double defaultThreshold = 0.5;
   private static String routingQuery ="" +
       "SELECT " +
       "   seq, " +
@@ -31,7 +32,7 @@ public class SPDLightRouter implements Router  {
       "  r.target::integer," +
       "  m_len(linestring) as length_cost, " +
       "  avg(COALESCE(l.value, 0)) as label_value, " +
-      "  m_len(linestring) + ( :ratio  * m_len(linestring) * ((avg(COALESCE(l.value, 0)))/100)) as cost " +
+      "  m_len(linestring) + ( m_len(linestring) * (((avg(COALESCE(l.value, 0)))/100) * :ratio - :threshold)) as cost " +
       "FROM " +
       "  roadsegment_noded as r " +
       "LEFT OUTER JOIN light_sample as l ON r.id = l.roadsegment_id AND l.time_class = time_class(localtimestamp) " +
@@ -55,12 +56,15 @@ public class SPDLightRouter implements Router  {
     Long endId = RouteResult.getNearestVertex(gf.createPoint(new Coordinate(Double.valueOf(to[1]), Double.valueOf(to[0]))));
 
     //Check ratio param
-    Double ratio = params.keySet().contains("ratio")?((Double) params.get("lightRatio")): defaultRatio;
+    Double ratio = params.keySet().contains("lightRatio")?(Double.valueOf(params.get("lightRatio").toString())): defaultRatio;
+
+    //Check ratio param
+    Double threshold = params.keySet().contains("threshold")?(Double.valueOf(params.get("threshold").toString())): defaultRatio;
 
     //Calculate routing path using PGRouting
     Logger.debug(this.getClass() + ": Start:" + startId + " End: " + endId + " Ratio: " + ratio);
     //NOTE: Forced to use String replace because :namedParameter doesn't work in text(...)
-    Query query = JPA.em().createNativeQuery(routingQuery.replace(":ratio", ratio.toString())).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
+    Query query = JPA.em().createNativeQuery(routingQuery.replace(":ratio", ratio.toString()).replace(":threshold", threshold.toString())).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
 
     RouteResult r = RouteResult.getRouteResultFromQueryResult(query.getResultList());
     PathRoutes.Feature f = new PathRoutes.Feature();

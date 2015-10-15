@@ -32,6 +32,16 @@
                 <button type="button" name="changeRatio" class="btn btn-default col-sm-3">Change</button>
             </div>
         </div>
+        <div class="form-horizontal">
+            <div class="form-group has-feedback">
+                <label for="threshold" class="col-sm-3 control-label">Threshold:</label>
+                <div class="col-sm-4">
+                    <input type="number" class="form-control" id="threshold" value="${params.threshold}" min="0" max="1" pattern="[0-9]+(\.[0-9]+)?" step="0.01" data-toggle="tooltip" data-placement="bottom" title="Value should be from 0 to 1">
+                    <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true" style="display: none;"></span>
+                </div>
+                <button type="button" name="changeRatio" class="btn btn-default col-sm-3">Change</button>
+            </div>
+        </div>
     </div>
 
 
@@ -156,7 +166,7 @@ for(i=0; i<${i};i++) {
 }
 
 $("button[name='changeRatio']").on( "click", function() {
-    window.location.href = "@{Application.route}?from=${params.from}&to=${params.to}&lightRatio="+$("#lightRatio").val()+"&noiseRatio="+$("#noiseRatio").val();
+    window.location.href = "@{Application.route}?from=${params.from}&to=${params.to}&lightRatio="+$("#lightRatio").val()+"&noiseRatio="+$("#noiseRatio").val()+"&threshold="+$("#threshold").val();
 });
 
 $("#lightRatio, #noiseRatio").on( "change", function(event) {
