@@ -44,7 +44,9 @@ public class SPDRouter implements Router {
 
     //Calculate routing path using PGRouting
     Logger.debug(this.getClass() + ": Start: " + startId + "  End: " + endId);
-    Query query = JPA.em().createNativeQuery(routingQuery).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
+    Query query = JPA.em().createNativeQuery(
+            routingQuery.replace(":start_vertex", startId.toString())
+                        .replace(":end_vertex", endId.toString()));
 
     RouteResult r = RouteResult.getRouteResultFromQueryResult(query.getResultList());
     PathRoutes.Feature f = new PathRoutes.Feature();

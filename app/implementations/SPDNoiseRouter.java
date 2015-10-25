@@ -34,7 +34,7 @@ public class SPDNoiseRouter implements Router  {
       "  m_len(linestring) + ( :ratio * m_len(linestring) * ((avg(COALESCE(l.value, 0))))) as cost " +
       "FROM " +
       "  roadsegment_noded as r " +
-      "LEFT OUTER JOIN noise_sample as l ON r.id = l.roadsegment_id AND l.time_class = time_class(localtimestamp) " +
+      "LEFT OUTER JOIN noise_sample as l ON r.id = l.id AND l.time_class = time_class(localtimestamp) " +
       "GROUP BY " +
       "  r.id," +
       "  r.source::integer," +

@@ -33,10 +33,10 @@ public class SPDLightRouter implements Router  {
       "  r.target::integer," +
       "  m_len(linestring) as length_cost, " +
       "  avg(COALESCE(l.value, 0)) as label_value, " +
-      "  m_len(linestring) + ( m_len(linestring) * (((avg(COALESCE(l.value, 0)))/100) * :ratio - :threshold)) as cost " +
+      "  m_len(linestring) + ( :ratio * m_len(linestring) * ( ((avg(COALESCE(l.value, 0)))/100) - :threshold) ) as cost " +
       "FROM " +
       "  roadsegment_noded as r " +
-      "LEFT OUTER JOIN light_sample as l ON r.id = l.roadsegment_id AND l.time_class = :timeClass " +
+      "LEFT OUTER JOIN light_sample as l ON r.id = l.id AND l.time_class = :timeClass " +
       "GROUP BY " +
       "  r.id," +
       "  r.source::integer," +
