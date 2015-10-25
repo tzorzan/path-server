@@ -14,7 +14,6 @@ import models.RoadSegment;
 import models.boundaries.PathRoutes;
 import play.db.jpa.JPA;
 import play.libs.F;
-import play.mvc.Http;
 
 import javax.persistence.Query;
 import java.math.BigInteger;
@@ -25,12 +24,14 @@ import java.util.*;
  */
 public class RouteResult {
   public List<Double[]> coordinates;
+  public Double cost;
   public Double length;
   public List<PathRoutes.Maneuver> maneuvers;
   public List<Integer> maneuverIndexes;
 
-  public RouteResult(List<Double[]> coordinates, Double length, List<PathRoutes.Maneuver> maneuvers, List<Integer> maneuverIndexes) {
+  public RouteResult(List<Double[]> coordinates, Double cost, Double length, List<PathRoutes.Maneuver> maneuvers, List<Integer> maneuverIndexes) {
     this.coordinates = coordinates;
+    this.cost = cost;
     this.length = length;
     this.maneuvers = maneuvers;
     this.maneuverIndexes = maneuverIndexes;
@@ -38,6 +39,7 @@ public class RouteResult {
 
   public static RouteResult getRouteResultFromQueryResult(List result) {
     List<Double[]> coordinates = new ArrayList<Double[]>();
+    Double cost = 0.0;
     Double length = 0.0;
     List<PathRoutes.Maneuver> maneuvers = new ArrayList<PathRoutes.Maneuver>();
     List<Integer> maneuverIndexes = new ArrayList<Integer>();
@@ -63,7 +65,8 @@ public class RouteResult {
           coordinates.add(coords);
         }
 
-        length += (Double) resArray[3];
+        cost += (Double) resArray[3];
+        length += getLinestringLength(segment.linestring);
         if(lastRoadSegment==null) {
           //inizializzo lastSegment e lastNode se sono alla prima iterazione
           lastRoadSegment=segment.roadSegment;
@@ -113,7 +116,7 @@ public class RouteResult {
     maneuvers.add(route_maneuver);
     maneuverIndexes.add(counter);
 
-    return new RouteResult(coordinates, length, maneuvers, maneuverIndexes);
+    return new RouteResult(coordinates, cost,length, maneuvers, maneuverIndexes);
   }
 
   private static String nearestVertexQuery = "" +
@@ -139,6 +142,12 @@ public class RouteResult {
     Object[] res = (Object[]) query.getSingleResult();
     return ((BigInteger) res[0]).longValue();
   }
+
+  public static Double getLinestringLength(LineString l){
+    Query query = JPA.em().createNativeQuery("SELECT m_len(ST_AsBinary(ST_GeomFromText('" + l.toText() +"')));");
+    Double length = (Double) query.getSingleResult();
+    return length;
+  };
 
   public static F.Promise<List<PathRoutes.Feature>> getAllRoutes(String[] from, String[] to, Map<String, Object> params) {
     F.Promise<PathRoutes.Feature> spdRouteJobResult = new RouteJob(new SPDRouter(), from, to, params).now();
