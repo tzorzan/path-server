@@ -42,6 +42,16 @@
                 <button type="button" name="changeRatio" class="btn btn-default col-sm-3">Change</button>
             </div>
         </div>
+        <div class="form-horizontal">
+            <div class="form-group has-feedback">
+                <label for="timeClass" class="col-sm-3 control-label">Time Class:</label>
+                <div class="col-sm-4">
+                    <input type="number" class="form-control" id="timeClass" value="${params.timeClass}" min="1" max="4" pattern="[1-4]" step="1" data-toggle="tooltip" data-placement="bottom" title="Value should be integer from 1 to 4">
+                    <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true" style="display: none;"></span>
+                </div>
+                <button type="button" name="changeRatio" class="btn btn-default col-sm-3">Change</button>
+            </div>
+        </div>
     </div>
 
 
@@ -166,10 +176,10 @@ for(i=0; i<${i};i++) {
 }
 
 $("button[name='changeRatio']").on( "click", function() {
-    window.location.href = "@{Application.route}?from=${params.from}&to=${params.to}&lightRatio="+$("#lightRatio").val()+"&noiseRatio="+$("#noiseRatio").val()+"&threshold="+$("#threshold").val();
+    window.location.href = "@{Application.route}?from=${params.from}&to=${params.to}&lightRatio="+$("#lightRatio").val()+"&noiseRatio="+$("#noiseRatio").val()+"&threshold="+$("#threshold").val()+"&timeClass="+$("#timeClass").val();
 });
 
-$("#lightRatio, #noiseRatio").on( "change", function(event) {
+$("#lightRatio, #noiseRatio, #threshold, #timeClass").on( "change", function(event) {
   var error = !(event.target.checkValidity());
   $(event.target).closest(".form-group").toggleClass("has-error", error);
   $(event.target).next("span").toggle(error);

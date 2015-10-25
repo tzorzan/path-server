@@ -3,9 +3,11 @@ package controllers;
 import com.google.gson.Gson;
 import implementations.SPDLightRouter;
 import models.boundaries.PathRoutes;
+import play.db.jpa.JPA;
 import play.mvc.*;
 import utils.RouteResult;
 
+import javax.persistence.Query;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class Application extends Controller {
         p.putAll(processParam("lightRatio"));
         p.putAll(processParam("noiseRatio"));
         p.putAll(processParam("threshold"));
+        p.putAll(processParam("timeClass"));
 
         List<PathRoutes.Feature> resultList = await(RouteResult.getAllRoutes(from, to, p));
 
@@ -53,8 +56,14 @@ public class Application extends Controller {
                 case "threshold":
                     s = String.valueOf(SPDLightRouter.defaultThreshold);
                     break;
+                case "timeClass":
+                    String sql = "SELECT time_class(localtimestamp);";
+                    Query query = JPA.em().createNativeQuery(sql);
+                    s = ((Integer) query.getSingleResult()).toString();
+                    break;
             }
             params.put(param, s);
+            map.put(param, s);
         }
         return map;
     }

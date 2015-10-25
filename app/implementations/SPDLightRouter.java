@@ -18,6 +18,7 @@ import java.util.Map;
 public class SPDLightRouter implements Router  {
   public static Double defaultRatio = 0.25;
   public static Double defaultThreshold = 0.5;
+  public static Integer defaultTimeClass = 1;
   private static String routingQuery ="" +
       "SELECT " +
       "   seq, " +
@@ -35,7 +36,7 @@ public class SPDLightRouter implements Router  {
       "  m_len(linestring) + ( m_len(linestring) * (((avg(COALESCE(l.value, 0)))/100) * :ratio - :threshold)) as cost " +
       "FROM " +
       "  roadsegment_noded as r " +
-      "LEFT OUTER JOIN light_sample as l ON r.id = l.roadsegment_id AND l.time_class = time_class(localtimestamp) " +
+      "LEFT OUTER JOIN light_sample as l ON r.id = l.roadsegment_id AND l.time_class = :timeClass " +
       "GROUP BY " +
       "  r.id," +
       "  r.source::integer," +
@@ -58,13 +59,23 @@ public class SPDLightRouter implements Router  {
     //Check ratio param
     Double ratio = params.keySet().contains("lightRatio")?(Double.valueOf(params.get("lightRatio").toString())): defaultRatio;
 
-    //Check ratio param
-    Double threshold = params.keySet().contains("threshold")?(Double.valueOf(params.get("threshold").toString())): defaultRatio;
+    //Check thershold param
+    Double threshold = params.keySet().contains("threshold")?(Double.valueOf(params.get("threshold").toString())): defaultThreshold;
+
+    //Check time class param
+    Integer timeClass = params.keySet().contains("timeClass")?(Integer.valueOf(params.get("timeClass").toString())): defaultTimeClass;
 
     //Calculate routing path using PGRouting
-    Logger.debug(this.getClass() + ": Start:" + startId + " End: " + endId + " Ratio: " + ratio);
+    Logger.debug(this.getClass() + ": Start:" + startId + " End: " + endId + " Ratio: " + ratio+ " Threshold: " + threshold + " Time class: " + timeClass);
+
     //NOTE: Forced to use String replace because :namedParameter doesn't work in text(...)
-    Query query = JPA.em().createNativeQuery(routingQuery.replace(":ratio", ratio.toString()).replace(":threshold", threshold.toString())).setParameter("start_vertex", startId).setParameter("end_vertex", endId);
+
+    Query query = JPA.em().createNativeQuery(
+            routingQuery.replace(":ratio", ratio.toString())
+                    .replace(":threshold", threshold.toString())
+                    .replace(":timeClass", timeClass.toString())
+                    .replace(":start_vertex", startId.toString())
+                    .replace(":end_vertex", endId.toString()));
 
     RouteResult r = RouteResult.getRouteResultFromQueryResult(query.getResultList());
     PathRoutes.Feature f = new PathRoutes.Feature();
